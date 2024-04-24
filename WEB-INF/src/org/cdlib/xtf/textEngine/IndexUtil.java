@@ -296,17 +296,21 @@ public class IndexUtil
           saxParserFactory = SAXParserFactory.newInstance();
         }
         catch (InstantiationException e2) {
-          throw new RuntimeException(e2);
+          // Okay, accept whatever the default is.
+          saxParserFactory = SAXParserFactory.newInstance();
         }
         catch (IllegalAccessException e2) {
-          throw new RuntimeException(e2);
+          // Okay, accept whatever the default is.
+          saxParserFactory = SAXParserFactory.newInstance();
         }
       }
       catch (InstantiationException e) {
-        throw new RuntimeException(e);
+          // Okay, accept whatever the default is.
+          saxParserFactory = SAXParserFactory.newInstance();
       }
       catch (IllegalAccessException e) {
-        throw new RuntimeException(e);
+          // Okay, accept whatever the default is.
+          saxParserFactory = SAXParserFactory.newInstance();
       }
     }
 
