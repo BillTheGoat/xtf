@@ -230,10 +230,8 @@ public class DynaXML extends TextServlet
       // Run the document request parser
       DocRequest docReq = runDocReqParser(req, makeAttribList(req));
 
-      // If source overridden in the URL, make sure it's really
-      // external.
-      //
-      if (!isEmpty(source) && source.startsWith("http://")) 
+      // If source overridden in the URL, make sure it's a recognized prefix.
+      if (!isEmpty(source) && config.sourceOverridePrefix.length() > 0 && source.startsWith(config.sourceOverridePrefix)) 
       {
         docReq = new DocRequest(docReq);
         docReq.source = source;

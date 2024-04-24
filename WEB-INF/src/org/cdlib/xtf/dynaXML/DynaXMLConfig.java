@@ -77,6 +77,9 @@ class DynaXMLConfig extends TextConfig
   /** Whether to generate lazy files alone (outside of textIndexer) */
   public boolean buildLazyFilesAlone = false;
 
+  /** Allowable prefix for URL source overrides */
+  public String sourceOverridePrefix;
+
   /**
    * Constructor - Reads and parses the global configuration file (XML) for
    * the servlet.
@@ -151,6 +154,10 @@ class DynaXMLConfig extends TextConfig
     }
     else if (tagAttr.equalsIgnoreCase("lazyTrees.buildAlone")) {
       buildLazyFilesAlone = parseBoolean(tagAttr, strVal);
+      return true;
+    }
+    else if (tagAttr.equalsIgnoreCase("allowSourceOverride.prefix")) {
+      sourceOverridePrefix = strVal;
       return true;
     }
 
