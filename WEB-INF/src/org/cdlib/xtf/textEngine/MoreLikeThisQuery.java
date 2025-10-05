@@ -248,7 +248,7 @@ public class MoreLikeThisQuery extends Query
       {
         if (fieldBoosts[i] > 0.0f) {
           filteredFields.add(fieldNames[i]);
-          boostMap.put(fieldNames[i], new Float(fieldBoosts[i]));
+          boostMap.put(fieldNames[i], Float.valueOf(fieldBoosts[i]));
         }
       }
       fields = (String[])filteredFields.toArray(new String[filteredFields.size()]);

@@ -8,6 +8,8 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.MessageDigest;
@@ -482,7 +484,7 @@ public class FileUtils
    * @throws XPathException if the document cannot be parsed
    */
   public static DocumentInfo readXMLStub(XPathContext context, String filePath)
-    throws IOException, XPathException
+    throws IOException, XPathException, URISyntaxException
   {
     // First, locate the file
     File file = resolveFile(context, filePath);
@@ -512,7 +514,7 @@ public class FileUtils
    * @throws XPathException if the document cannot be parsed
    */
   public static DocumentInfo readHTMLPage(XPathContext context, String urlStr)
-    throws IOException, XPathException
+    throws IOException, XPathException, URISyntaxException
   {
     // Read the HTML page, and convert it to an XML string
     URL url;
@@ -520,7 +522,7 @@ public class FileUtils
     InputStream inStream = null;
     String pageStr;
     try {
-      url = new URL(urlStr);
+      url = new URI(urlStr).toURL();
       connection = url.openConnection();
       inStream = connection.getInputStream();
       pageStr = HTMLToString.convert(inStream);

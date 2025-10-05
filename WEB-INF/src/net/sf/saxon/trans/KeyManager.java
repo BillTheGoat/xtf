@@ -687,7 +687,7 @@ public class KeyManager implements Serializable
       indexList = (Map)indexRef.get();
     }
     indexList.put(
-      new Long(((long)keyFingerprint) << 32 | itemType.getFingerprint()),
+      Long.valueOf(((long)keyFingerprint) << 32 | itemType.getFingerprint()),
       index);
   }
 
@@ -711,7 +711,7 @@ public class KeyManager implements Serializable
     if (indexList == null)
       return null;
     return indexList.get(
-      new Long(((long)keyFingerprint) << 32 | itemType.getFingerprint()));
+      Long.valueOf(((long)keyFingerprint) << 32 | itemType.getFingerprint()));
   }
 
   /**

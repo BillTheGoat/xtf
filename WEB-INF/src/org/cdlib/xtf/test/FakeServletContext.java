@@ -34,9 +34,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.Set;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContext;
 import org.cdlib.xtf.util.Path;
 
 /**
@@ -167,4 +167,171 @@ public class FakeServletContext implements ServletContext
   public String getContextPath() {
     return null;
   }
+@Override
+public String getRequestCharacterEncoding() {
+    return null;
+}
+
+@Override
+public void setRequestCharacterEncoding(String encoding) {
+    // Not implemented for this test class
+}
+
+@Override
+public String getResponseCharacterEncoding() {
+    return null;
+}
+
+@Override
+public void setResponseCharacterEncoding(String encoding) {
+    // Not implemented for this test class
+}
+
+@Override
+public int getSessionTimeout() {
+    return 0;
+}
+
+@Override
+public void setSessionTimeout(int sessionTimeout) {
+    // Not implemented for this test class
+}
+@Override
+public String getVirtualServerName() {
+    return null;
+}
+
+@Override
+public jakarta.servlet.SessionCookieConfig getSessionCookieConfig() {
+    return null;
+}
+
+@Override
+public void addListener(String className) {
+    // Not implemented for this test class
+}
+
+@Override
+public <T extends java.util.EventListener> void addListener(T t) {
+    // Not implemented for this test class
+}
+
+@Override
+public void addListener(Class<? extends java.util.EventListener> listenerClass) {
+    // Not implemented for this test class
+}
+
+@Override
+public <T extends java.util.EventListener> T createListener(Class<T> clazz) 
+        throws jakarta.servlet.ServletException {
+    return null;
+}
+
+@Override
+public jakarta.servlet.descriptor.JspConfigDescriptor getJspConfigDescriptor() {
+    return null;
+}
+
+@Override
+public ClassLoader getClassLoader() {
+    return null;
+}
+
+@Override
+public void declareRoles(String... roleNames) {
+    // Not implemented for this test class
+}
+
+@Override
+public java.util.Set<jakarta.servlet.SessionTrackingMode> getDefaultSessionTrackingModes() {
+    return new java.util.HashSet<>();
+}
+
+@Override
+public java.util.Set<jakarta.servlet.SessionTrackingMode> getEffectiveSessionTrackingModes() {
+    return new java.util.HashSet<>();
+}
+
+@Override
+public void setSessionTrackingModes(java.util.Set<jakarta.servlet.SessionTrackingMode> sessionTrackingModes) {
+    // Not implemented for this test class
+}
+@Override
+public java.util.Map<String, ? extends jakarta.servlet.ServletRegistration> getServletRegistrations() {
+    return new java.util.HashMap<>();
+}
+
+@Override
+public jakarta.servlet.ServletRegistration getServletRegistration(String servletName) {
+    return null;
+}
+
+@Override
+public java.util.Map<String, ? extends jakarta.servlet.FilterRegistration> getFilterRegistrations() {
+    return new java.util.HashMap<>();
+}
+
+@Override
+public jakarta.servlet.FilterRegistration getFilterRegistration(String filterName) {
+    return null;
+}
+
+@Override
+public jakarta.servlet.ServletRegistration.Dynamic addServlet(String servletName, String className) {
+    return null;
+}
+
+@Override
+public jakarta.servlet.ServletRegistration.Dynamic addServlet(String servletName, jakarta.servlet.Servlet servlet) {
+    return null;
+}
+
+@Override
+public jakarta.servlet.ServletRegistration.Dynamic addServlet(String servletName, Class<? extends jakarta.servlet.Servlet> servletClass) {
+    return null;
+}
+
+@Override
+public jakarta.servlet.ServletRegistration.Dynamic addJspFile(String servletName, String jspFile) {
+    return null;
+}
+
+@Override
+public <T extends jakarta.servlet.Servlet> T createServlet(Class<T> clazz) throws jakarta.servlet.ServletException {
+    return null;
+}
+
+@Override
+public jakarta.servlet.FilterRegistration.Dynamic addFilter(String filterName, String className) {
+    return null;
+}
+
+@Override
+public jakarta.servlet.FilterRegistration.Dynamic addFilter(String filterName, jakarta.servlet.Filter filter) {
+    return null;
+}
+
+@Override
+public jakarta.servlet.FilterRegistration.Dynamic addFilter(String filterName, Class<? extends jakarta.servlet.Filter> filterClass) {
+    return null;
+}
+
+@Override
+public <T extends jakarta.servlet.Filter> T createFilter(Class<T> clazz) throws jakarta.servlet.ServletException {
+    return null;
+}
+@Override
+public boolean setInitParameter(String name, String value) {
+    return false;
+}
+@Override
+public int getEffectiveMajorVersion() {
+    return 5;
+}
+
+@Override
+public int getEffectiveMinorVersion() {
+    return 0;
+}
+
 } // class FakeServletContext

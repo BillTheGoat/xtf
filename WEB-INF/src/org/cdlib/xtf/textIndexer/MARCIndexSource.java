@@ -1,6 +1,5 @@
 package org.cdlib.xtf.textIndexer;
 
-
 /*
  * Copyright (c) 2004, Regents of the University of California
  * All rights reserved.
@@ -36,28 +35,24 @@ package org.cdlib.xtf.textIndexer;
  * as part of the Melvyl Recommender Project.
  */
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Vector;
-import javax.xml.transform.Result;
-import javax.xml.transform.Source;
 import javax.xml.transform.Templates;
-import javax.xml.transform.sax.SAXResult;
-import javax.xml.transform.sax.SAXSource;
 
 import org.apache.lucene.util.CountedInputStream;
 import org.cdlib.xtf.util.Normalizer;
 import org.cdlib.xtf.util.StructuredStore;
-import org.marc4j.marc.MarcConstants;
-import org.marc4j.marcxml.Converter;
-import org.marc4j.marcxml.DoctypeDecl;
-import org.marc4j.marcxml.MarcXmlReader;
+import org.marc4j.MarcReader;
+import org.marc4j.MarcStreamReader;
+import org.marc4j.MarcXmlWriter;
+import org.marc4j.marc.Record;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
@@ -233,6 +228,29 @@ public class MARCIndexSource extends IndexSource
   } // openFile()
 
   /**
+   * Detect encoding from MARC leader byte 9
+   */
+  private String detectMarcEncoding(InputStream inputStream) throws IOException {
+    inputStream.mark(24);
+    byte[] leader = new byte[24];
+    int bytesRead = inputStream.read(leader);
+    inputStream.reset();
+    
+    if (bytesRead >= 24) {
+      char encodingByte = (char) leader[9];
+      switch (encodingByte) {
+        case 'a':
+          return "UTF-8";
+        case ' ':
+        case '#':
+        default:
+          return "ISO8859_1";  // MARC-8 or default
+      }
+    }
+    return "ISO8859_1";  // Default fallback
+  }
+
+  /**
    * Handles running blocks of records through the stylesheet
    */
   private class RecordHandler extends Thread implements ContentHandler 
@@ -301,28 +319,95 @@ public class MARCIndexSource extends IndexSource
     private void convertRecords()
       throws Exception 
     {
-      // Make byte data into characters
-      Reader reader = new InputStreamReader(rawStream, "ISO8859_1");
-
-      // Make a producer that knows how to parse MARC
-      MarcXmlReader producer = new MarcXmlReader();
-      try {
-        producer.setProperty(
-          "http://marc4j.org/properties/document-type-declaration",
-          new DoctypeDecl());
+      // Detect encoding from MARC leader
+      String encoding = detectMarcEncoding(rawStream);
+      
+      // Create a MarcReader with the detected encoding
+      MarcReader reader = new MarcStreamReader(rawStream, encoding);
+      
+      // Process each record
+      while (reader.hasNext()) {
+        try {
+          Record record = reader.next();
+          
+          // Convert to MARCXML using MarcXmlWriter
+          ByteArrayOutputStream baos = new ByteArrayOutputStream();
+          MarcXmlWriter writer = new MarcXmlWriter(baos, true);  // true = UTF-8
+          writer.setIndent(true);
+          writer.write(record);
+          writer.close();
+          
+          // Get the XML as a string
+          String marcXml = baos.toString("UTF-8");
+          // Strip illegal XML characters (including ESC 0x1B from MARC-8)
+          marcXml = stripIllegalXmlCharacters(marcXml);
+          
+          // Parse through our ContentHandler to apply normalization
+          parseXmlString(marcXml);
+          
+        } catch (Exception e) {
+          System.err.println("Error processing MARC record " + recordNum + ": " + e.getMessage());
+          throw e;
+        }
       }
-      catch (SAXException e) { /*ignore*/
-      }
-
-      // Here's the input to the MARC converter
-      InputSource in = new InputSource(reader);
-      Source source = new SAXSource(producer, in);
-
-      Result marcXmlResult = new SAXResult(this);
-
-      Converter converter = new Converter();
-      converter.convert(source, marcXmlResult);
     } // convertRecords
+
+    /**
+     * Parse MARCXML string through our ContentHandler for normalization
+     */
+    private void parseXmlString(String xml) throws Exception {
+      javax.xml.parsers.SAXParserFactory factory = 
+        javax.xml.parsers.SAXParserFactory.newInstance();
+      factory.setNamespaceAware(true);
+      javax.xml.parsers.SAXParser parser = factory.newSAXParser();
+      
+      org.xml.sax.XMLReader xmlReader = parser.getXMLReader();
+      xmlReader.setContentHandler(this);
+      
+      InputSource source = new InputSource(new StringReader(xml));
+      xmlReader.parse(source);
+    }
+
+    private String stripIllegalXmlCharacters(String input) {
+      if (input == null) return null;
+      
+      // Pattern matches &#[decimal]; or &#x[hex]; entity references
+      java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("&#(x?)([0-9A-Fa-f]+);");
+      java.util.regex.Matcher matcher = pattern.matcher(input);
+      
+      StringBuffer sb = new StringBuffer();
+      while (matcher.find()) {
+        String hexPrefix = matcher.group(1);
+        String numStr = matcher.group(2);
+        
+        try {
+          int charCode;
+          if ("x".equals(hexPrefix)) {
+            charCode = Integer.parseInt(numStr, 16);
+          } else {
+            charCode = Integer.parseInt(numStr, 10);
+          }
+          
+          // Check if this is an illegal XML character
+          // Legal: 0x9 (tab), 0xA (LF), 0xD (CR), 0x20-0xD7FF, 0xE000-0xFFFD
+          if ((charCode == 0x9 || charCode == 0xA || charCode == 0xD) ||
+              (charCode >= 0x20 && charCode <= 0xD7FF) ||
+              (charCode >= 0xE000 && charCode <= 0xFFFD)) {
+            // Legal character - keep the entity reference
+            matcher.appendReplacement(sb, matcher.group(0));
+          } else {
+            // Illegal character - remove it (replace with empty string)
+            matcher.appendReplacement(sb, "");
+          }
+        } catch (NumberFormatException e) {
+          // If we can't parse it, keep it as-is
+          matcher.appendReplacement(sb, matcher.group(0));
+        }
+      }
+      matcher.appendTail(sb);
+      
+      return sb.toString();
+    }
 
     private boolean skipBadRecord()
       throws IOException 
@@ -336,7 +421,8 @@ public class MARCIndexSource extends IndexSource
           System.out.println("Bad MARC data near end of file. Skipping.");
           return false;
         }
-        if (ch == MarcConstants.RT)
+        // Look for record terminator (0x1D)
+        if (ch == 0x1D)
           break;
         ++nSkipped;
       }
@@ -498,13 +584,6 @@ public class MARCIndexSource extends IndexSource
     public void characters(char[] ch, int start, int length)
       throws SAXException 
     {
-      String s = convertFromUTF8(ch, start, length);
-      if (s != null) {
-        ch = s.toCharArray();
-        start = 0;
-        length = ch.length;
-      }
-
       // Scan for suspicious characters that might need Unicode 
       // normalization.
       //
@@ -530,12 +609,10 @@ public class MARCIndexSource extends IndexSource
 
       if (needNormalize) 
       {
-        s = new String(ch, start, length);
+        String s = new String(ch, start, length);
         String s2 = Normalizer.normalize(s);
         if (!s.equals(s2)) 
         {
-          //System.out.println( "Translated non-normalized Unicode in record " + (numCompleted + 1) +
-          //    ": " + s );
           ch = s2.toCharArray();
           start = 0;
           length = ch.length;
@@ -612,98 +689,5 @@ public class MARCIndexSource extends IndexSource
       throws SAXException 
     {
     }
-
-    /**
-     * Look for probable UTF-8 encoding. If found, convert it to Unicode;
-     * if not, return null.
-     *
-     * @param chars   Array of characters to convert
-     * @param start   Where to start in the array
-     * @param length  How many characters to examine
-     * @return        New Unicode string, or null if no UTF-8 characters
-     *                found.
-     */
-    public String convertFromUTF8(char[] chars, int start, int length) 
-    {
-      // Scan the string, looking for likely UTF8.
-      boolean foundUTF = false;
-      for (int i = start; i < start + length; i++) 
-      {
-        char c = chars[i];
-
-        // If somehow we already have 2-byte chars, this probably isn't
-        // a UTF8 string.
-        //
-        if ((c & 0xFF00) != 0)
-          return null;
-
-        // Skip the ASCII chars
-        if (c <= 0x7F)
-          continue;
-
-        // Look for a two-byte sequence
-        if (c >= 0xC0 &&
-            c <= 0xDF &&
-            i + 1 < chars.length &&
-            chars[i + 1] >= 0x80 &&
-            chars[i + 1] <= 0xBF) 
-        {
-          foundUTF = true;
-          i++;
-        }
-
-        // Look for a three-byte sequence
-        else if (c >= 0xE0 &&
-                 c <= 0xEF &&
-                 i + 2 < chars.length &&
-                 chars[i + 1] >= 0x80 &&
-                 chars[i + 1] <= 0xBF &&
-                 chars[i + 2] >= 0x80 &&
-                 chars[i + 2] <= 0xBF) 
-        {
-          foundUTF = true;
-          i += 2;
-        }
-
-        // Look for a four-byte sequence
-        else if (c >= 0xF0 &&
-                 c <= 0xF7 &&
-                 i + 3 < chars.length &&
-                 chars[i + 1] >= 0x80 &&
-                 chars[i + 1] <= 0xBF &&
-                 chars[i + 2] >= 0x80 &&
-                 chars[i + 2] <= 0xBF &&
-                 chars[i + 3] >= 0x80 &&
-                 chars[i + 3] <= 0xBF) 
-        {
-          foundUTF = true;
-          i += 3;
-        }
-
-        // Trailing bytes without leading bytes are illegal, and thus
-        // likely this string isn't UTF8 encoded.
-        //
-        else if (c >= 0x80 && c <= 0xBF)
-          return null;
-
-        // Certain other bytes are also illegal.
-        else if (c >= 0xF8 && c <= 0xFF)
-          return null;
-      }
-
-      // No UTF8 chars found? Nothing to do.
-      if (!foundUTF)
-        return null;
-
-      // Okay, convert the UTF8 value to Unicode.
-      try {
-        String value = new String(chars, start, length);
-        byte[] bytes = value.getBytes("ISO-8859-1");
-        return new String(bytes, "UTF-8");
-      }
-      catch (UnsupportedEncodingException e) {
-        return null;
-      }
-    } // convertUTF8inURL()
   } // class RecordHandler
-} // class SimpleSrcTextInfo
+} // class MARCIndexSource

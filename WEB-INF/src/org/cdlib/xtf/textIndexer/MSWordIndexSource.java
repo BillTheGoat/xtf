@@ -94,7 +94,7 @@ public class MSWordIndexSource extends XMLIndexSource
 
       // And make an InputSource with a proper system ID
       InputSource finalSrc = new InputSource(new StringReader(outBuf.toString()));
-      finalSrc.setSystemId(msWordFile.toURL().toString());
+      finalSrc.setSystemId(msWordFile.toURI().toURL().toString());
       return finalSrc;
     }
     catch (IOException e) {

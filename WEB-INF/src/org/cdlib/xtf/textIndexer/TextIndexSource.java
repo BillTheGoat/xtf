@@ -81,7 +81,7 @@ public class TextIndexSource extends XMLIndexSource
 
     // And make an InputSource with a proper system ID
     InputSource finalSrc = new InputSource(new StringReader(str));
-    finalSrc.setSystemId(textFile.toURL().toString());
+    finalSrc.setSystemId(textFile.toURI().toURL().toString());
     return finalSrc;
   } // filterInput()
 } // class TextSrcFile

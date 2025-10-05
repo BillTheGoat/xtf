@@ -35,8 +35,8 @@ import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.util.HashMap;
 import javax.imageio.ImageIO;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.cdlib.xtf.servletBase.TextServlet;
 import org.cdlib.xtf.saxonExt.InstructionWithContent;

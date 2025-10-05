@@ -1,6 +1,5 @@
 package org.cdlib.xtf.textIndexer;
 
-
 /**
  * Copyright (c) 2004, Regents of the University of California
  * All rights reserved.
@@ -30,11 +29,13 @@ package org.cdlib.xtf.textIndexer;
  * POSSIBILITY OF SUCH DAMAGE.
  */
 import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.HashMap;
 
 import org.w3c.tidy.Tidy;
+import org.mozilla.universalchardet.UniversalDetector;
 import org.cdlib.xtf.util.*;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -66,7 +67,7 @@ public class HTMLToString
    */
   static public String convert(InputStream htmlInputStream) 
   {
-    // Tell Tidy to supress warning and other output messsages.
+    // Tell Tidy to suppress warning and other output messages.
     if (Trace.getOutputLevel() == Trace.debug) {
       tidy.setErrout(new PrintWriter(new TraceWriter(Trace.debug)));
       tidy.setQuiet(false);
@@ -79,56 +80,42 @@ public class HTMLToString
 
     // Tell Tidy to make XML as it outputs.
     tidy.setXmlOut(true);
+    tidy.setOutputEncoding("UTF-8");
+    tidy.setForceOutput(true); // return something whenever possible
+    tidy.setDocType("omit"); // Omit DOCTYPE to avoid parsing issues
     
-    // Output non-breaking spaces as "&nbsp;" so we can easily detect them
-    // and replace them with &#160; below to avoid problems parsing the XML.
-    //
-    tidy.setQuoteNbsp(true);
-    
-    // Make sure we get something, even if errors are found. Our goal is to
-    // index after all, not to fix the world's HTML.
-    //
-    tidy.setForceOutput(true);
-    
-    try 
-    {
-      // Create a buffer to output the XML to.
-      ByteArrayOutputStream out = new ByteArrayOutputStream();
+    try {
+        // Detect input encoding using juniversalchardet, fallback to UTF-8
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        byte[] tmp = new byte[4096];
+        int n;
+        while ((n = htmlInputStream.read(tmp)) != -1) {
+            buffer.write(tmp, 0, n);
+        }
+        byte[] data = buffer.toByteArray();
+        UniversalDetector detector = new UniversalDetector(null);
+        detector.handleData(data, 0, data.length);
+        detector.dataEnd();
+        String detected = detector.getDetectedCharset();
+        detector.reset();
+        String encoding = (detected != null) ? detected : "UTF-8";
+        Trace.debug("Detected HTML encoding: " + encoding);
+        tidy.setInputEncoding(encoding);
 
-      // Convert the HTML to XML.
-      tidy.parse(htmlInputStream, out);
+        // --- Convert the HTML to XML ---
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try (InputStream tidyInput = new ByteArrayInputStream(data)) {
+            tidy.parse(tidyInput, out);
+        }
 
-      // Get a string version of the resulting XML.
-      String retStr = out.toString();
+        // --- Convert output to string ---
+        String retStr = out.toString("UTF-8");
+        // remove illegal control characters
+        retStr = retStr.replaceAll("[\\x00-\\x08\\x0B-\\x0C\\x0E-\\x1F]", "");
+        // Replace windows abused control codes with proper unicode
+        retStr = replaceHtmlCodes(retStr);
 
-      // Check to see if the XML has a document type tag.
-      int docStartIdx = retStr.indexOf("<!DOCTYPE");
-
-      // If it does...
-      if (docStartIdx != -1) 
-      {
-        // Find the end of the tag.
-        int docEndIdx = retStr.indexOf(">", docStartIdx);
-
-        // Isolate the entire document type tag.
-        String docTypeStr = retStr.substring(docStartIdx,
-                                             docEndIdx - docStartIdx + 1);
-
-        // And then remove the document tag from the XML. Why? Because
-        // it often causes trouble when the XML parser tries to interpret
-        // it. Especially coming from HTML.
-        //
-        retStr = retStr.replaceAll(docTypeStr, "");
-      }
-
-      // Also, XML doesn't support the "&nbsp;" alias, so replace any 
-      // occurences with the actual character code for a non-breaking
-      // space. Likewise for other non-XML codes.
-      // 
-      retStr = replaceHtmlCodes(retStr);
-      
-      // Finally, return the XML string to the caller.
-      return retStr;
+        return retStr;
     } //try
 
     // If anything went wrong, say what it was.
@@ -143,125 +130,6 @@ public class HTMLToString
     return null;
   } // static public String convert()
 
-  //////////////////////////////////////////////////////////////////////////////
-
-  /**
-   * Table of conversions from HTML ampersand codes to UNICODE. We indicate
-   * the few codes that don't need conversion at the start of the table.
-   */
-  static final String[] htmlCodes = 
-  {
-    // XML-compatible codes.
-    "lt", "lt", "gt", "gt", "amp", "amp", "apos", "apos", "quot", "quot",
-                                      
-    // HTML-only codes.
-    "nbsp", "160", "iexcl", "161", "cent", "162", "cent", "162", "pound", "163",
-    "curren", "164", "yen", "165", "brvbar",
-    "166", "sect", "167", "uml", "168", "copy",
-    "169", "ordf", "170", "laquo", "171",
-    "not", "172", "shy", "173", "reg", "174",
-    "macr", "175", "deg", "176", "plusmn",
-    "177", "sup2", "178", "sup3", "179",
-    "acute", "180", "micro", "181", "para",
-    "182", "middot", "183", "cedil", "184",
-    "sup1", "185", "ordm", "186", "raquo",
-    "187", "frac14", "188", "frac12", "189",
-    "frac34", "190", "iquest", "191", "Agrave",
-    "192", "Aacute", "193", "Acirc", "194",
-    "Atilde", "195", "Auml", "196", "Aring",
-    "197", "AElig", "198", "Ccedil", "199",
-    "Egrave", "200", "Eacute", "201", "Ecirc",
-    "202", "Euml", "203", "Igrave", "204",
-    "Iacute", "205", "Icirc", "206", "Iuml",
-    "207", "ETH", "208", "Ntilde", "209",
-    "Ograve", "210", "Oacute", "211", "Ocirc",
-    "212", "Otilde", "213", "Ouml", "214",
-    "times", "215", "Oslash", "216", "Ugrave",
-    "217", "Uacute", "218", "Ucirc", "219",
-    "Uuml", "220", "Yacute", "221", "THORN",
-    "222", "szlig", "223", "szlig", "223",
-    "agrave", "224", "aacute", "225", "acirc",
-    "226", "atilde", "227", "auml", "228",
-    "aring", "229", "aelig", "230", "ccedil",
-    "231", "egrave", "232", "eacute", "233",
-    "ecirc", "234", "euml", "235", "igrave",
-    "236", "iacute", "237", "icirc", "238",
-    "iuml", "239", "eth", "240", "ntilde",
-    "241", "ograve", "242", "oacute", "243",
-    "ocirc", "244", "otilde", "245", "ouml",
-    "246", "divide", "247", "oslash", "248",
-    "ugrave", "249", "uacute", "250", "ucirc",
-    "251", "uuml", "252", "yacute", "253",
-    "thorn", "254", "yuml", "255", "OElig",
-    "338", "oelig", "339", "Scaron", "352",
-    "scaron", "353", "Yuml", "376", "fnof",
-    "402", "circ", "710", "tilde", "732",
-    "Alpha", "913", "Beta", "914", "Gamma",
-    "915", "Delta", "916", "Epsilon", "917",
-    "Zeta", "918", "Eta", "919", "Theta",
-    "920", "Iota", "921", "Kappa", "922",
-    "Lambda", "923", "Mu", "924", "Nu", "925",
-    "Xi", "926", "Omicron", "927", "Pi", "928",
-    "Rho", "929", "Sigma", "931", "Tau", "932",
-    "Upsilon", "933", "Phi", "934", "Chi",
-    "935", "Psi", "936", "Omega", "937",
-    "alpha", "945", "beta", "946", "gamma",
-    "947", "delta", "948", "epsilon", "949",
-    "zeta", "950", "eta", "951", "theta",
-    "952", "iota", "953", "kappa", "954",
-    "lambda", "955", "mu", "956", "nu", "957",
-    "xi", "958", "omicron", "959", "pi", "960",
-    "rho", "961", "sigmaf", "962", "sigma",
-    "963", "tau", "964", "upsilon", "965",
-    "phi", "966", "chi", "967", "psi", "968",
-    "omega", "969", "thetasym", "977", "upsih",
-    "978", "piv", "982", "ensp", "8194",
-    "emsp", "8195", "thinsp", "8201", "zwnj",
-    "8204", "zwj", "8205", "lrm", "8206",
-    "rlm", "8207", "ndash", "8211", "mdash",
-    "8212", "lsquo", "8216", "rsquo", "8217",
-    "sbquo", "8218", "ldquo", "8220", "rdquo",
-    "8221", "bdquo", "8222", "dagger", "8224",
-    "Dagger", "8225", "bull", "8226", "hellip",
-    "8230", "permil", "8240", "prime", "8242",
-    "Prime", "8243", "lsaquo", "8249",
-    "rsaquo", "8250", "oline", "8254", "frasl",
-    "8260", "euro", "8364", "image", "8465",
-    "weierp", "8472", "real", "8476", "trade",
-    "8482", "alefsym", "8501", "larr", "8592",
-    "uarr", "8593", "rarr", "8594", "darr",
-    "8595", "harr", "8596", "crarr", "8629",
-    "lArr", "8656", "uArr", "8657", "rArr",
-    "8658", "dArr", "8659", "hArr", "8660",
-    "forall", "8704", "part", "8706", "exist",
-    "8707", "empty", "8709", "nabla", "8711",
-    "isin", "8712", "notin", "8713", "ni",
-    "8715", "prod", "8719", "sum", "8721",
-    "minus", "8722", "lowast", "8727", "radic",
-    "8730", "prop", "8733", "infin", "8734",
-    "ang", "8736", "and", "8743", "or", "8744",
-    "cap", "8745", "cup", "8746", "int",
-    "8747", "there4", "8756", "sim", "8764",
-    "cong", "8773", "asymp", "8776", "ne",
-    "8800", "equiv", "8801", "le", "8804",
-    "ge", "8805", "sub", "8834", "sup", "8835",
-    "nsub", "8836", "sube", "8838", "supe",
-    "8839", "oplus", "8853", "otimes", "8855",
-    "perp", "8869", "sdot", "8901", "lceil",
-    "8968", "rceil", "8969", "lfloor", "8970",
-    "rfloor", "8971", "lang", "9001", "rang",
-    "9002", "loz", "9674", "spades", "9824",
-    "clubs", "9827", "hearts", "9829", "diams",
-    "9830",
-};
-
-  /** Build a HashMap from the code table above */
-  private static HashMap htmlCodeMap = new HashMap();
-
-  static {
-    for (int i = 0; i < htmlCodes.length; i += 2)
-      htmlCodeMap.put(htmlCodes[i], htmlCodes[i + 1]);
-  }
 
   //////////////////////////////////////////////////////////////////////////////
 
@@ -270,115 +138,99 @@ public class HTMLToString
    *
    *  @param in  The string within which to convert codes.
    */
-  public static String replaceHtmlCodes(String in) 
+public static String replaceHtmlCodes(String in) 
+{
+  // Scan through the string, looking for numeric HTML entities in the 128-159 range
+  StringBuffer out = new StringBuffer(in.length());
+  char[] inChars = in.toCharArray();
+  int i = 0;
+  
+  while (i < inChars.length) 
   {
-    // Scan through the string, looking for ampersand codes.
-    StringBuffer out = new StringBuffer(in.length() * 3 / 2);
-    char[] inChars = in.toCharArray();
-    int i = 0;
-    while (i < inChars.length) 
+    // Look for an ampersand
+    if (inChars[i] != '&') { 
+      out.append(inChars[i++]);
+      continue;
+    }
+    
+    // Find the end of the entity
+    int start = i + 1;
+    int end = start;
+    while (end < inChars.length && 
+           (inChars[end] == '#' || Character.isLetterOrDigit(inChars[end])))
     {
-      // Look for an ampersand code (but not "&#xxx;")
-      if (inChars[i] != '&') { 
-        out.append(inChars[i++]);
-        continue;
-      }
-
-      // Find the end of the code.
-      int start = i + 1;
-      int end = start;
-      while (end < inChars.length && 
-             (inChars[end] == '#' || Character.isLetterOrDigit(inChars[end])))
-      {
-        end++;
-      }
-      
-      if (end == inChars.length || inChars[end] != ';') {
-        out.append(inChars[i++]);
-        continue;
-      }
-      
-      // If it's numeric, check for the invalid range.
-      if (inChars[start] == '#') 
-      {
-        try {
-          int codeNum = Integer.parseInt(in.substring(start+1, end));
-          if (codeNum >= 128 && codeNum <= 159)
+      end++;
+    }
+    
+    // Must end with semicolon
+    if (end == inChars.length || inChars[end] != ';') {
+      out.append(inChars[i++]);
+      continue;
+    }
+    
+    // Check if it's a numeric entity (&#xxx;)
+    if (inChars[start] == '#') 
+    {
+      try {
+        int codeNum = Integer.parseInt(in.substring(start + 1, end));
+        
+        // Only replace Windows-1252 codes (128-159)
+        if (codeNum >= 128 && codeNum <= 159)
+        {
+          int outNum = 0;
+          switch (codeNum)
           {
-            out.append("&#");
-            int outNum = 0;
-            switch (codeNum)
-            {
-              case 128:  outNum = 0x20ac;  break;
-              case 129:  outNum = 0x0081;  break;
-              case 130:  outNum = 0x201A;  break;
-              case 131:  outNum = 0x0192;  break;
-              case 132:  outNum = 0x201E;  break;
-              case 133:  outNum = 0x2026;  break;
-              case 134:  outNum = 0x2020;  break;
-              case 135:  outNum = 0x2021;  break;
-              case 136:  outNum = 0x02C6;  break;
-              case 137:  outNum = 0x2030;  break;
-              case 138:  outNum = 0x0160;  break;
-              case 139:  outNum = 0x2039;  break;
-              case 140:  outNum = 0x0152;  break;
-              case 141:  outNum = 0x008D;  break;
-              case 142:  outNum = 0x017D;  break;
-              case 143:  outNum = 0x008F;  break;
-              case 144:  outNum = 0x0090;  break;
-              case 145:  outNum = 0x2018;  break;
-              case 146:  outNum = 0x2019;  break;
-              case 147:  outNum = 0x201C;  break;
-              case 148:  outNum = 0x201D;  break;
-              case 149:  outNum = 0x2022;  break;
-              case 150:  outNum = 0x2013;  break;
-              case 151:  outNum = 0x2014;  break;
-              case 152:  outNum = 0x02DC;  break;
-              case 153:  outNum = 0x2122;  break;
-              case 154:  outNum = 0x0161;  break;
-              case 155:  outNum = 0x203A;  break;
-              case 156:  outNum = 0x0153;  break;
-              case 157:  outNum = 0x009D;  break;
-              case 158:  outNum = 0x017E;  break;
-              case 159:  outNum = 0x0178;  break;
-            }
-            out.append(Integer.toString(outNum) + ";");
-            i = end + 1;
-            continue;
+            case 128:  outNum = 0x20ac;  break;
+            case 129:  outNum = 0x0081;  break;
+            case 130:  outNum = 0x201A;  break;
+            case 131:  outNum = 0x0192;  break;
+            case 132:  outNum = 0x201E;  break;
+            case 133:  outNum = 0x2026;  break;
+            case 134:  outNum = 0x2020;  break;
+            case 135:  outNum = 0x2021;  break;
+            case 136:  outNum = 0x02C6;  break;
+            case 137:  outNum = 0x2030;  break;
+            case 138:  outNum = 0x0160;  break;
+            case 139:  outNum = 0x2039;  break;
+            case 140:  outNum = 0x0152;  break;
+            case 141:  outNum = 0x008D;  break;
+            case 142:  outNum = 0x017D;  break;
+            case 143:  outNum = 0x008F;  break;
+            case 144:  outNum = 0x0090;  break;
+            case 145:  outNum = 0x2018;  break;
+            case 146:  outNum = 0x2019;  break;
+            case 147:  outNum = 0x201C;  break;
+            case 148:  outNum = 0x201D;  break;
+            case 149:  outNum = 0x2022;  break;
+            case 150:  outNum = 0x2013;  break;
+            case 151:  outNum = 0x2014;  break;
+            case 152:  outNum = 0x02DC;  break;
+            case 153:  outNum = 0x2122;  break;
+            case 154:  outNum = 0x0161;  break;
+            case 155:  outNum = 0x203A;  break;
+            case 156:  outNum = 0x0153;  break;
+            case 157:  outNum = 0x009D;  break;
+            case 158:  outNum = 0x017E;  break;
+            case 159:  outNum = 0x0178;  break;
           }
+          out.append("&#");
+          out.append(Integer.toString(outNum));
+          out.append(";");
+          i = end + 1;
+          continue;
         }
-        catch (NumberFormatException e) { }
-
-        // Number not parseable, or not a problem.
-        out.append(inChars[i++]);
-        continue;
       }
-
-      // Look the code up in our map.
-      String code = in.substring(start, end);
-      String mapTo = (String)htmlCodeMap.get(code);
-
-      // If not found, delete the whole code.
-      if (mapTo == null) {
-        i = end + 1;
-        continue;
+      catch (NumberFormatException e) { 
+        // Not a valid number, pass through as-is
       }
-
-      // If it's already XML-compatible, pass it through unchanged.
-      if (code.equals(mapTo)) {
-        out.append(inChars[i++]);
-        continue;
-      }
-
-      // Replace it with an XML-compatible code.
-      out.append("&#");
-      out.append(mapTo);
-      out.append(";");
-      i = end + 1;
-    } // for i
-
-    // Convert the result back to a string.
-    return out.toString();
-  } // replaceHtmlCodes()
+    }
+    
+    // Pass through unchanged (numeric entity outside 128-159 range, 
+    // named entity, or malformed entity)
+    out.append(inChars[i++]);
+  }
+  
+  return out.toString();
+} //replaceHtmlCodes()
 
 } // class HTMLToString

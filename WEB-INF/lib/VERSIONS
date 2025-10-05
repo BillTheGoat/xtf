@@ -1,11 +1,42 @@
-iText version: 2.1.7
-  iText.jar
+2025.10.10:Changed to leaving version numbers in file names and updating build.xml so they self-document.
 
-  Note: We cannot use 5.x iText since its Aferro GPL is incompatible with BSD/LGPL/Apache.
-        Can I just complain here how evil it is to take a free tool and commercialize it?
 
-PDFBox version: 1.8.5
-  pdfBox.jar
+commons-io-2.17.0.jar             jakarta         used by pdfbox and fop
+commons-logging-1.3.0.jar         jakarta         used by pdfbox and fop
 
-FontBox version: 1.8.5
-  fontBox.jar
+cql-java.jar                      javax native    last version was 1.12, in 2014. Unknown version here. No attempt to update
+
+fontbox-3.0.6.jar                 jakarta         follows pdfbox
+
+lib/fop/*.jar                     jakarta         fop 2.11 files subdir dynamically pulled into uberjar on build
+
+iText-2.1.7.jar                   javax native    Last truly open source version
+
+jakarta.activation-2.0.1.jar      jakarta         2.0.1 is last version that includes a full EE spec that will run on a non-EE server
+jakarta.mail-2.0.1.jar            jakarta         2.0.1 is last version that includes a full EE spec that will run on a non-EE server
+jakarta.servlet-api-6.1.0.jar     jakarta
+
+javacc-7.0.13.jar                 jakarta
+
+jtidy-r938.jar                    jakarta
+juniversalchardet-2.5.0.jar       jakarta         Added to detect encoding of Tidy input for better results.
+
+lucene-core-2.1.0.jar             javax native    need to update entire xtf-lucene to update lucene.
+
+marc4j-2.9.6.jar                  jakarta
+
+poi-3.0.2-FINAL.jar               javax native    did not attempt upgrade, would be better to move to apache tika for more formats, especially odt
+
+pdfbox-3.0.6.jar                  jakarta
+pdfbox-io-3.0.6.jar               jakarta         Required as separate import by pdfbox 3.x
+
+saxonb-8.9.jar                    javax native    highly integrated with custom xtf classes, and one of the last versions where it is easy to add the sql connector.
+
+tm-extractors-1.0.jar             javax native    This looks like the last version released
+
+
+
+NOTES:
+      log4j - jar missing from lib directory and could not find use in WEB-INF - removed from build.xml.
+      fop 2.11: had pdfbox-io and fontbox in dependencies, removed since already using newer versions in xtf.
+      Some of the "javax native" jars were modified by the tomcat javax2jakarta update tool, mainly to update the manifest, rare other changes.

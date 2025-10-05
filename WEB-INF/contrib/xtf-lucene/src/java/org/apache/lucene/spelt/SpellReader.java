@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
+import java.lang.ref.Cleaner;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
@@ -64,6 +65,8 @@ import org.apache.lucene.util.StringUtil;
  */
 public class SpellReader 
 {
+  // Cleaner for automatic resource cleanup as a fallback
+  private static final Cleaner CLEANER = Cleaner.create();
   /** Keys in the edit map file */
   private IntList edMapKeys;
 
@@ -96,6 +99,9 @@ public class SpellReader
 
   /** Word equivalency checker */
   private WordEquiv wordEquiv;
+
+  /** Cleaner registration for automatic cleanup */
+  private Cleaner.Cleanable cleanable;
   
   /** Private constructor -- use {@link #open(File)} instead. */
   private SpellReader() {
@@ -128,7 +134,32 @@ public class SpellReader
     reader.loadFreqSamples(spellDir);
     reader.loadWordFreqs(spellDir);
     reader.openPairFreqs(spellDir);
+    // Register cleanup action
+    reader.cleanable = CLEANER.register(reader, new CleanupAction(reader.edMapFile));
     return reader;
+  }
+
+  /**
+   * Cleanup action that will be invoked by the Cleaner.
+   * Must not hold a reference to the SpellReader instance.
+   */
+  private static class CleanupAction implements Runnable {
+    private final RandomAccessFile fileToClose;
+    
+    CleanupAction(RandomAccessFile file) {
+      this.fileToClose = file;
+    }
+    
+    @Override
+    public void run() {
+      if (fileToClose != null) {
+        try {
+          fileToClose.close();
+        } catch (IOException e) {
+          // Silently ignore - this is best-effort cleanup
+        }
+      }
+    }
   }
   
   /**
@@ -245,6 +276,12 @@ public class SpellReader
   public void close()
     throws IOException 
   {
+    // Clean the Cleaner registration
+    if (cleanable != null) {
+      cleanable.clean();
+      cleanable = null;
+    }
+    
     if (edMapFile != null) {
       edMapFile.close();
       edMapFile = null;
@@ -954,12 +991,6 @@ public class SpellReader
       pairFreqs = new FreqData();
       pairFreqs.add(new File(spellDir, "pairs.dat"));
     }
-  }
-
-  protected void finalize()
-    throws Throwable 
-  {
-    close();
   }
 
   private String calcMetaphone(String word) {

@@ -161,7 +161,7 @@ public class StylesheetCache extends GeneratingCache
       if (path.startsWith("http:"))
         url = path;
       else
-        url = file.toURL().toString();
+        url = file.toURI().toURL().toString();
       Templates x = factory.newTemplates(new SAXSource(new InputSource(url)));
       if (x == null)
         throw new TransformerException("Cannot read stylesheet: " + path);

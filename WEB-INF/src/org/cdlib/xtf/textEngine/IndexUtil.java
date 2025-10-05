@@ -32,6 +32,8 @@ package org.cdlib.xtf.textEngine;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -282,14 +284,14 @@ public class IndexUtil
       {
         Class factoryClass = Class.forName(
           "com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl");
-        saxParserFactory = (SAXParserFactory)factoryClass.newInstance();
+        saxParserFactory = (SAXParserFactory)factoryClass.getDeclaredConstructor().newInstance();
       }
       catch (ClassNotFoundException e) {
         try 
         {
           Class factoryClass = Class.forName(
             "org.apache.crimson.jaxp.SAXParserFactoryImpl");
-          saxParserFactory = (SAXParserFactory)factoryClass.newInstance();
+          saxParserFactory = (SAXParserFactory)factoryClass.getDeclaredConstructor().newInstance();
         }
         catch (ClassNotFoundException e2) {
           // Okay, accept whatever the default is.
@@ -303,12 +305,28 @@ public class IndexUtil
           // Okay, accept whatever the default is.
           saxParserFactory = SAXParserFactory.newInstance();
         }
+         catch (InvocationTargetException e2) {
+          // Okay, accept whatever the default is.
+          saxParserFactory = SAXParserFactory.newInstance();
+        }
+        catch (NoSuchMethodException e2) {
+            // Okay, accept whatever the default is.
+            saxParserFactory = SAXParserFactory.newInstance();
+        }
       }
       catch (InstantiationException e) {
           // Okay, accept whatever the default is.
           saxParserFactory = SAXParserFactory.newInstance();
       }
       catch (IllegalAccessException e) {
+          // Okay, accept whatever the default is.
+          saxParserFactory = SAXParserFactory.newInstance();
+      }
+      catch (InvocationTargetException e) {
+          // Okay, accept whatever the default is.
+          saxParserFactory = SAXParserFactory.newInstance();
+      }
+      catch (NoSuchMethodException e) {
           // Okay, accept whatever the default is.
           saxParserFactory = SAXParserFactory.newInstance();
       }

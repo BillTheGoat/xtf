@@ -15,7 +15,13 @@
   <property name="doc"     location="javadoc"/>
   <property name="lucene-jar" location="${lib}/lucene-core-2.1.0.jar"/>
   <property name="saxon-jar" location="${lib}/saxonb-8.9.jar"/>
-  <property name="libs"    value="${lucene-jar}:${saxon-jar}:${lib}/servlet.jar:${lib}/pdfBox.jar:${lib}/fontBox.jar:${lib}/log4j-1.2.9.jar:${lib}/Tidy.jar:${lib}/cql-java.jar:${lib}/marc4j.jar:${lib}/activation.jar:${lib}/mail.jar:${lib}/tm-extractors-1.0.jar:${lib}/poi-3.0.2-FINAL.jar:${lib}/fop-core-0.95.jar:${lib}/fop-libs-0.95.jar:${lib}/iText.jar"/>
+  <property name="libs"    value="${lucene-jar}:${saxon-jar}:${lib}/jakarta.servlet-api-6.1.0.jar:${lib}/pdfbox-3.0.6.jar:${lib}/pdfbox-io-3.0.6.jar:${lib}/fontBox-3.0.6.jar:${lib}/jtidy-r938.jar:${lib}/juniversalchardet-2.5.0.jar:${lib}/cql-java.jar:${lib}/marc4j-2.9.6.jar:${lib}/jakarta.activation-2.0.1.jar:${lib}/jakarta.mail-2.0.1.jar:${lib}/tm-extractors-1.0.jar:${lib}/iText-2.1.7.jar:${lib}/poi-3.0.2-FINAL.jar:${lib}/commons-io-2.17.0.jar:${lib}/commons-logging-1.3.0.jar"/>
+   <!-- combine existing libs property with all jars under lib/fop -->
+  <path id="project.classpath">
+    <pathelement path="${libs}"/>
+    <fileset dir="${lib}/fop" includes="**/*.jar" />
+  </path>
+
 
   <target name="init">
     <!-- Create the time stamp -->
@@ -28,13 +34,17 @@
   <target name="compile" depends="init"
         description="compile the source " >
     <!-- Compile the java code from ${src} into ${classes} -->
-    <javac target="1.5" 
-           source="1.5" 
+    <javac target="21" 
+           source="21" 
            debug="true"
-           classpath="${libs}"
+           classpathref="project.classpath"
            encoding="UTF-8"
            excludes="**/.*/**/*"
-           destdir="${classes}">
+           destdir="${classes}"
+           includeantruntime="false">
+      <!-- <compilerarg value="-Xlint:unchecked"/> -->
+      <!-- <compilerarg value="-Xlint:deprecation" /> -->
+      <!-- <compilerarg value="-Xlint:rawtypes"/> -->
       <src path="${src1}"/>
       <src path="${src2}"/>
     </javac>
@@ -72,8 +82,30 @@
     <delete dir="jar-tmp" quiet="true"/>
   </target>
 
+  <!-- ================================================== fop-uber-jar -->
+<target name="fop-uber-jar" description="Create uber-jar from fop subdirectory JARs">
+    <delete file="${lib}/fop-all-2.11.jar" quiet="true"/>
+    <mkdir dir="build-tmp-fop"/>
+    
+    <!-- Unzip all fop JARs into temp directory -->
+    <unzip dest="build-tmp-fop">
+        <fileset dir="${lib}/fop" includes="**/*.jar"/>
+    </unzip>
+    
+    <!-- Create the uber-jar -->
+    <jar destfile="${lib}/fop-all-2.11.jar" basedir="build-tmp-fop">
+        <!-- Exclude META-INF to avoid conflicts -->
+        <exclude name="META-INF/*.SF"/>
+        <exclude name="META-INF/*.DSA"/>
+        <exclude name="META-INF/*.RSA"/>
+    </jar>
+    
+    <!-- Clean up temp directory -->
+    <delete dir="build-tmp-fop"/>
+</target>
+
   <!-- ================================================== dist -->
-  <target name="dist" depends="jar,docs"
+  <target name="dist" depends="jar,docs,fop-uber-jar"
           description="generate the distribution" >
     <!-- Create the distribution directory -->
     <mkdir dir="${dist}"/>
@@ -86,7 +118,6 @@
 
     <!-- Copy the jar file containing the XTF classes -->
     <copy todir="build-tmp/WEB-INF/lib" file="${dist}/xtf.jar"/>
-
     <!-- Zip up the regression tests -->
     <zip zipfile="build-tmp/regress.zip">
       <fileset dir="..">
@@ -109,7 +140,7 @@
       <fileset dir="." includes="contrib/**/*.html"/>
       <fileset dir="." includes="lib/lucene*.jar"/> <!-- Normally part of xtf.jar, needed for build -->
       <fileset dir="." includes="lib/saxon*.jar"/> <!-- Normally part of xtf.jar, needed for build -->
-      <fileset dir="." includes="lib/servlet.jar"/> <!-- Only needed for source build -->
+      <fileset dir="." includes="lib/jakarta.servlet-api.jar"/> <!-- Only needed for source build -->
     </zip>
 
     <!-- Zip up the JavaDocs -->
@@ -162,9 +193,9 @@
 
         <include name="WEB-INF/build.xml"/>
         <include name="WEB-INF/web.xml"/>
-        <include name="WEB-INF/lib/versions.txt"/>
+        <include name="WEB-INF/lib/VERSIONS"/>
         <include name="WEB-INF/lib/*.jar"/>
-        <exclude name="WEB-INF/lib/servlet.jar"/> <!-- only needed in src.zip -->
+        <exclude name="WEB-INF/lib/jakarta.servlet-api.jar"/> <!-- only needed in src.zip -->
         <exclude name="WEB-INF/lib/lucene-*.jar"/> <!-- Included in xtf.jar -->
         <exclude name="WEB-INF/lib/saxon*.jar"/> <!-- Included in xtf.jar -->
 
@@ -210,6 +241,7 @@
 
     <delete dir="build-tmp" quiet="true"/>
     <delete file="${dist}/xtf.jar" quiet="true"/>
+    <delete file="${lib}/fop-libs.jar" quiet="true"/>
   </target>
 
   <!-- ================================================== docs -->
@@ -218,9 +250,9 @@
     <javadoc destdir="${doc}" 
              private="true" 
              breakiterator="yes"
-             source="1.5"
+             source="21"
              encoding="UTF-8"
-             classpath="${libs}"
+             classpathref="project.classpath"
              noqualifier="all">
       <tag name=".notes" description="Notes:"/>
 

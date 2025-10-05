@@ -36,8 +36,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +46,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -59,15 +59,17 @@ import org.cdlib.xtf.servletBase.TextServlet;
 import org.cdlib.xtf.util.Trace;
 import org.cdlib.xtf.xslt.FileUtils;
 import org.xml.sax.SAXException;
-import org.apache.avalon.framework.configuration.Configuration;
-import org.apache.avalon.framework.configuration.ConfigurationException;
-import org.apache.avalon.framework.configuration.DefaultConfigurationBuilder;
+
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.apache.fop.configuration.Configuration;
+import org.apache.fop.configuration.ConfigurationException;
+import org.apache.fop.configuration.DefaultConfigurationBuilder;
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FOUserAgent;
 import org.apache.fop.apps.Fop;
 import org.apache.fop.apps.FopFactory;
 import org.apache.fop.apps.MimeConstants;
+import org.apache.fop.apps.FopFactoryBuilder;
 
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
@@ -102,291 +104,209 @@ import net.sf.saxon.trans.XPathException;
  */
 public class PipeFopElement extends ElementWithContent 
 {
-  private static HashMap<String, FopFactory> fopFactories = new HashMap();
-  private static Lock fopLock = new ReentrantLock();
-  
-  private enum MergeAt { START, END };
-  private enum MergeMode { SEQUENTIAL, OVERLAY, UNDERLAY };
-  
-  public void prepareAttributes() throws XPathException 
-  {
-    String[] mandatoryAtts = { };
-    String[] optionalAtts = { "fileName", 
-                              "author", "creator", "keywords", "producer", "title",
-                              "overrideMetadata", // default: no
-                              "appendPDF",        // backward compatibility only (no default)
-                              "mergePDFFile",     // default: none
-                              "mergeAt",          // "begin", *"end"
-                              "mergeMode",        // *"sequential", "overlay", "underlay"
-                              "fallbackIfError",  // default: yes
-                              "fontDirs",         // default: none
-                              "waitTime"          // default: 5 (seconds)
-                            };
-    parseAttributes(mandatoryAtts, optionalAtts);
-  }
+    private static final HashMap<String, FopFactory> fopFactories = new HashMap<>();
+    private static final Lock fopLock = new ReentrantLock();
 
-  public Expression compile(Executable exec) throws XPathException { 
-    return new PipeFopInstruction(attribs, compileContent(exec));
-  }
+    private enum MergeAt { START, END };
+    private enum MergeMode { SEQUENTIAL, OVERLAY, UNDERLAY };
 
-  /** Worker class for PipeFopElement */
-  private static class PipeFopInstruction extends InstructionWithContent 
-  {
-    public PipeFopInstruction(Map<String, Expression> attribs, Expression content) 
+    public void prepareAttributes() throws XPathException 
     {
-      super("pipe:pipeFop", attribs, content);
+        String[] mandatoryAtts = {};
+        String[] optionalAtts = { "fileName", 
+                                  "author", "creator", "keywords", "producer", "title",
+                                  "overrideMetadata",
+                                  "appendPDF",
+                                  "mergePDFFile",
+                                  "mergeAt",
+                                  "mergeMode",
+                                  "fallbackIfError",
+                                  "fontDirs",
+                                  "waitTime"
+                                };
+        parseAttributes(mandatoryAtts, optionalAtts);
     }
 
-    /**
-     * The real workhorse.
-     */
-    @Override
-    public TailCall processLeavingTail(XPathContext context) 
-      throws XPathException 
+    public Expression compile(Executable exec) throws XPathException { 
+        return new PipeFopInstruction(attribs, compileContent(exec));
+    }
+
+    /** Worker class for PipeFopElement */
+    private static class PipeFopInstruction extends InstructionWithContent 
     {
-      // Set the content type
-      HttpServletResponse servletResponse = TextServlet.getCurResponse();
-      servletResponse.setHeader("Content-type", "application/pdf");
-      
-      // If output file name specified, add the Content-disposition header.
-      String fileName = getAttribStr("fileName", context);
-      if (fileName != null && fileName.length() != 0)
-        servletResponse.setHeader("Content-disposition", "attachment; filename=\"" + fileName + "\"");
-      
-      // Get name of file to merge, if any.
-      String nameToMerge = getAttribStr("mergePDFFile", context,
-                       /*backward-compatibility:*/ getAttribStr("appendPDF", context, null));
-      
-      // Resolve it to a full path.
-      File fileToMerge = null;
-      if (nameToMerge != null) {
-        fileToMerge = FileUtils.resolveFile(context, nameToMerge);
-        if (!fileToMerge.canRead())
-          dynamicError("Cannot read file '" + fileToMerge.toString() + "'", "PIPE_FOP_010", context);
-      }
-      
-      // Merge mode (if any)
-      MergeMode mergeMode = MergeMode.SEQUENTIAL;
-      String tmp = getAttribStr("mergeMode", context, "sequential");
-      if (tmp.equalsIgnoreCase("sequential"))
-        mergeMode = MergeMode.SEQUENTIAL;
-      else if (tmp.equalsIgnoreCase("overlay"))
-        mergeMode = MergeMode.OVERLAY;
-      else if (tmp.equalsIgnoreCase("underlay"))
-        mergeMode = MergeMode.UNDERLAY;
-      else
-        dynamicError("Unrecognized mergeMode '" + tmp + "'", "PIPE_FOP_008", context);
-        
-      // Merge location (if any)
-      MergeAt mergeAt = MergeAt.START;
-      tmp = getAttribStr("mergeAt", context, "start");
-      if (tmp.equalsIgnoreCase("start"))
-        mergeAt = MergeAt.START;
-      else if (tmp.equalsIgnoreCase("end"))
-        mergeAt = MergeAt.END;
-      else
-        dynamicError("Unrecognized mergeAt '" + tmp + "'", "PIPE_FOP_009", context);
-        
-      try {
-
-        // Interesting workaround: using FOP normally results in an AWT "Window"
-        // being created. However, since we're running in a servlet container, this
-        // isn't generally desirable (and often isn't possible.) So we let AWT know
-        // that it's running in "headless" mode, and this prevents the window from
-        // being created.
-        //
-        System.setProperty("java.awt.headless", "true");
-        
-        // Despite generally being a NodeInfo, 'content' doesn't seem to work directly
-        // as a Source. Fortunately TinyBuilder gives us very fast way to convert it.
-        //
-        Item contentItem = content.evaluateItem(context);
-        Source src = TinyBuilder.build((Source)contentItem, null, context.getConfiguration());
-        
-        // Setup JAXP using identity transformer
-        TransformerFactory transFactory = new net.sf.saxon.TransformerFactoryImpl();
-        Transformer transformer = transFactory.newTransformer(); // identity transformer
-
-        // So that we can keep the lock on FOP short, and also so we can send an
-        // accurate Content-length header to the client, we'll accumulate the FOP output
-        // in a temp file. We don't use a memory buffer since sometimes these things
-        // can be quite huge.
-        //
-        File tempFile = new File(FileUtils.createTempFile(context, "xtfFop.", ".tmp"));
-        FileOutputStream fopOut = new FileOutputStream(tempFile);
-        
-        // According to the Apache docs, FOP may not be thread-safe. So, we need to
-        // single-thread it. However, we must at all costs keep requests from backing
-        // up behind each other in a scenario where many clients are making requests
-        // all at once. So put a time limit on it.
-        //
-        int lockTime;
-        if (attribs.containsKey("waitTime"))
-          lockTime = Integer.parseInt(attribs.get("waitTime").evaluateAsString(context));
-        else
-          lockTime = 5; // default to waiting 5 seconds
-        boolean gotLock = false;
-        try {
-          if (lockTime <= 0) {
-            gotLock = true;
-            fopLock.lock();
-          }
-          else
-            gotLock = fopLock.tryLock(lockTime, TimeUnit.SECONDS);
-        
-          // Failure to get the lock is an error. However, this exception will
-          // be caught below and, if requested, we'll fall back to just outputting
-          // the append PDF.
-          //
-          if (!gotLock)
-            throw new TimeoutException("Timed out trying to obtain FOP lock");
-          
-          // For speed, only create FOP factory if we haven't already got one.
-          FopFactory fopFactory = createFopFactory(context);
-          
-          // Apply the optional things that can be added to the PDF header
-          FOUserAgent foAgent = fopFactory.newFOUserAgent();
-          if (attribs.containsKey("author"))
-            foAgent.setAuthor(attribs.get("author").evaluateAsString(context));
-          if (attribs.containsKey("creator"))
-            foAgent.setCreator(attribs.get("creator").evaluateAsString(context));
-          if (attribs.containsKey("keywords"))
-            foAgent.setKeywords(attribs.get("keywords").evaluateAsString(context));
-          if (attribs.containsKey("producer"))
-            foAgent.setProducer(attribs.get("producer").evaluateAsString(context));
-          if (attribs.containsKey("title"))
-            foAgent.setTitle(attribs.get("title").evaluateAsString(context));
-
-          // Now run FOP
-          Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, foAgent, fopOut);
-          transformer.transform(src, new SAXResult(fop.getDefaultHandler()));
-        }
-        finally 
+        public PipeFopInstruction(Map<String, Expression> attribs, Expression content) 
         {
-          // Always release the FOP lock when we're done, regardless of what happened.
-          if (gotLock)
-            fopLock.unlock();
-          if (fopOut != null)
-            fopOut.close();
+            super("pipe:pipeFop", attribs, content);
         }
-        
-        // Now that we've released the FOP lock, check if we need to merge a PDF or not.
-        
-        File finalOut;
-        if (fileToMerge != null) {
-          File tempFile2 = new File(FileUtils.createTempFile(context, "xtfFopMerge.", ".tmp"));
-          finalOut = tempFile2;
-          OutputStream mergeOut = new BufferedOutputStream(new FileOutputStream(tempFile2));
-          try {
-            mergePdf(context, tempFile, fileToMerge, mergeMode, mergeAt, mergeOut);
-          }
-          finally {
-            mergeOut.close();
-          }
-        }
-        else 
-          finalOut = tempFile;
-        
-        // Now we know the output length, so let the client know and then send it.
-        servletResponse.setHeader("Content-length", Long.toString(finalOut.length()));
-        PipeFileElement.copyFileToStream(finalOut, servletResponse.getOutputStream());
-      } 
-      catch (Throwable e) 
-      {
-        // If requested, fall back to simply piping the PDF file itself, without any FOP prefix.
-        if (fileToMerge != null)
+
+        @Override
+        public TailCall processLeavingTail(XPathContext context) 
+          throws XPathException 
         {
-          if (getAttribBool("fallbackIfError", context, true))
-          {
+            HttpServletResponse servletResponse = TextServlet.getCurResponse();
+            servletResponse.setHeader("Content-type", "application/pdf");
+
+            String fileName = getAttribStr("fileName", context);
+            if (fileName != null && !fileName.isEmpty())
+                servletResponse.setHeader("Content-disposition", "attachment; filename=\"" + fileName + "\"");
+
+            String nameToMerge = getAttribStr("mergePDFFile", context,
+                                    getAttribStr("appendPDF", context, null));
+
+            File fileToMerge = null;
+            if (nameToMerge != null) {
+                fileToMerge = FileUtils.resolveFile(context, nameToMerge);
+                if (!fileToMerge.canRead())
+                    dynamicError("Cannot read file '" + fileToMerge.toString() + "'", "PIPE_FOP_010", context);
+            }
+
+            MergeMode mergeMode = MergeMode.SEQUENTIAL;
+            String tmp = getAttribStr("mergeMode", context, "sequential");
+            if (tmp.equalsIgnoreCase("overlay"))
+                mergeMode = MergeMode.OVERLAY;
+            else if (tmp.equalsIgnoreCase("underlay"))
+                mergeMode = MergeMode.UNDERLAY;
+
+            MergeAt mergeAt = MergeAt.START;
+            tmp = getAttribStr("mergeAt", context, "start");
+            if (tmp.equalsIgnoreCase("end"))
+                mergeAt = MergeAt.END;
+
             try {
-              Trace.warning("Warning: pipeFop failed, falling back to just piping PDF file. Cause: " + e.toString());
-              servletResponse.setHeader("Content-length", Long.toString(fileToMerge.length()));
-              PipeFileElement.copyFileToStream(fileToMerge, servletResponse.getOutputStream());
-              e = null;
-            }
-            catch (IOException e2) {
-              e = e2;
-            }
-          }
-        }
-        
-        // Process any resulting exception into a Saxon dynamic error.
-        if (e != null) {
-          String code;
-          if (e instanceof IOException)
-            code = "PIPE_FOP_001";
-          else if (e instanceof TransformerException)
-            code = "PIPE_FOP_002";
-          else if (e instanceof FOPException)
-            code = "PIPE_FOP_003";
-          else if (e instanceof DocumentException)
-            code = "PIPE_FOP_004";
-          else if (e instanceof TimeoutException)
-            code = "PIPE_FOP_005";
-          else
-            code = "PIPE_FOP_006";
-          dynamicError(e, "Error while piping FOP: " + e.toString(), code, context);
-        }
-      }
+                System.setProperty("java.awt.headless", "true");
 
-      // All done.
-      return null;
-    }
+                Item contentItem = content.evaluateItem(context);
+                Source src = TinyBuilder.build((Source)contentItem, null, context.getConfiguration());
 
-    /** Create a FOP factory and configure it, if we don't already have one. */ 
-    private FopFactory createFopFactory(XPathContext context) 
-      throws ConfigurationException, SAXException, IOException, XPathException 
-    {
-      // See if any font directories were specified.
-      String fontDirs = "";
-      if (attribs.containsKey("fontDirs"))
+                TransformerFactory transFactory = new net.sf.saxon.TransformerFactoryImpl();
+                Transformer transformer = transFactory.newTransformer();
+
+                File tempFile = new File(FileUtils.createTempFile(context, "xtfFop.", ".tmp"));
+                FileOutputStream fopOut = new FileOutputStream(tempFile);
+
+                int lockTime = 5;
+                if (attribs.containsKey("waitTime"))
+                    lockTime = Integer.parseInt(attribs.get("waitTime").evaluateAsString(context));
+                boolean gotLock = false;
+                try {
+                    if (lockTime <= 0) {
+                        gotLock = true;
+                        fopLock.lock();
+                    } else
+                        gotLock = fopLock.tryLock(lockTime, TimeUnit.SECONDS);
+
+                    if (!gotLock)
+                        throw new TimeoutException("Timed out trying to obtain FOP lock");
+
+                    FopFactory fopFactory = createFopFactory(context);
+                    FOUserAgent foAgent = fopFactory.newFOUserAgent();
+                    if (attribs.containsKey("author")) foAgent.setAuthor(attribs.get("author").evaluateAsString(context));
+                    if (attribs.containsKey("creator")) foAgent.setCreator(attribs.get("creator").evaluateAsString(context));
+                    if (attribs.containsKey("keywords")) foAgent.setKeywords(attribs.get("keywords").evaluateAsString(context));
+                    if (attribs.containsKey("producer")) foAgent.setProducer(attribs.get("producer").evaluateAsString(context));
+                    if (attribs.containsKey("title")) foAgent.setTitle(attribs.get("title").evaluateAsString(context));
+
+                    Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, foAgent, fopOut);
+                    transformer.transform(src, new SAXResult(fop.getDefaultHandler()));
+                } finally {
+                    if (gotLock) fopLock.unlock();
+                    if (fopOut != null) fopOut.close();
+                }
+
+                File finalOut = tempFile;
+                if (fileToMerge != null) {
+                    File tempFile2 = new File(FileUtils.createTempFile(context, "xtfFopMerge.", ".tmp"));
+                    finalOut = tempFile2;
+                    try (OutputStream mergeOut = new BufferedOutputStream(new FileOutputStream(tempFile2))) {
+                        mergePdf(context, tempFile, fileToMerge, mergeMode, mergeAt, mergeOut);
+                    }
+                }
+
+                servletResponse.setHeader("Content-length", Long.toString(finalOut.length()));
+                PipeFileElement.copyFileToStream(finalOut, servletResponse.getOutputStream());
+            } catch (Throwable e) {
+                if (fileToMerge != null && getAttribBool("fallbackIfError", context, true)) {
+                    try {
+                        Trace.warning("Warning: pipeFop failed, falling back to just piping PDF file. Cause: " + e.toString());
+                        servletResponse.setHeader("Content-length", Long.toString(fileToMerge.length()));
+                        PipeFileElement.copyFileToStream(fileToMerge, servletResponse.getOutputStream());
+                        e = null;
+                    } catch (IOException e2) {
+                        e = e2;
+                    }
+                }
+
+                if (e != null) {
+                    String code;
+                    if (e instanceof IOException) code = "PIPE_FOP_001";
+                    else if (e instanceof TransformerException) code = "PIPE_FOP_002";
+                    else if (e instanceof FOPException) code = "PIPE_FOP_003";
+                    else if (e instanceof DocumentException) code = "PIPE_FOP_004";
+                    else if (e instanceof TimeoutException) code = "PIPE_FOP_005";
+                    else code = "PIPE_FOP_006";
+                    dynamicError(e, "Error while piping FOP: " + e.toString(), code, context);
+                }
+            }
+
+            return null;
+        }
+
+        /** Create a FOP factory and configure it, if we don't already have one. */ 
+        private FopFactory createFopFactory(XPathContext context)
+    throws IOException, SAXException, XPathException, ConfigurationException
+{
+    String fontDirs = "";
+    if (attribs.containsKey("fontDirs"))
         fontDirs = attribs.get("fontDirs").evaluateAsString(context);
-      
-      // If we've already created a factory with this set of font directories,
-      // don't re-create (it's expensive.)
-      //
-      if (fopFactories.containsKey(fontDirs))
-        return fopFactories.get(fontDirs);
-      
-      // Gotta make a new one.
-      FopFactory factory = FopFactory.newInstance();
-      if (fontDirs.length() > 0) 
-      {
-        // The only way I've figured out to put font search directories into the 
-        // factory is to feed in an XML config file. So construct one.
-        //
-        StringBuilder buf = new StringBuilder();
-        buf.append("<?xml version=\"1.0\"?>" +
-                   "<fop version=\"1.0\">" +
-                   "  <renderers>" +
-                   "    <renderer mime=\"application/pdf\">" +
-                   "      <fonts>");
-        
-        for (String dir : fontDirs.split(";"))
-          buf.append("        <directory>" + dir + "</directory>");
-        
-        buf.append("      </fonts>" +
-                   "    </renderer>" +
-                   "  </renderers>" +
-                   "</fop>");
 
-        // Jump through hoops to make the XML into an InputStream
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        OutputStreamWriter osw = new OutputStreamWriter(bos);
-        osw.write(buf.toString());
-        osw.flush();
-        ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-        
-        // Build the configuration and stick it into the factory.
+    // Return cached factory if we already built one for this fontDirs key
+    if (fopFactories.containsKey(fontDirs))
+        return fopFactories.get(fontDirs);
+
+    FopFactory factory;
+
+    // If user provided font directories, build dynamic XML config
+    if (fontDirs != null && !fontDirs.isEmpty()) {
+
+        // Build the XML configuration dynamically
+        StringBuilder buf = new StringBuilder();
+        buf.append("<?xml version=\"1.0\"?>")
+           .append("<fop version=\"1.0\">")
+           .append("  <renderers>")
+           .append("    <renderer mime=\"application/pdf\">")
+           .append("      <fonts>");
+        for (String dir : fontDirs.split(";")) {
+            buf.append("        <directory recursive=\"true\">")
+               .append(dir.trim())
+               .append("</directory>");
+        }
+        buf.append("      </fonts>")
+           .append("    </renderer>")
+           .append("  </renderers>")
+           .append("</fop>");
+
+        // Convert XML to a Configuration object
+        ByteArrayInputStream bis =
+            new ByteArrayInputStream(buf.toString().getBytes(StandardCharsets.UTF_8));
         DefaultConfigurationBuilder cfgBuilder = new DefaultConfigurationBuilder();
         Configuration config = cfgBuilder.build(bis);
-        factory.setUserConfig(config);
-      }
-      
-      // Cache this factory so we don't have to create it again (they're expensive.)
-      fopFactories.put(fontDirs, factory);
-      return factory;
+
+        // Build FopFactory with configuration
+        FopFactoryBuilder builder = new FopFactoryBuilder(new File(".").toURI());
+        builder.setConfiguration(config);
+        factory = builder.build();
     }
+    else {
+        // Default factory (no fontDirs specified)
+        factory = FopFactory.newInstance(new File(".").toURI());
+    }
+
+    // Cache this factory for reuse (they're expensive to build)
+    fopFactories.put(fontDirs, factory);
+
+    return factory;
+}
+
     
     /** 
      * Do the work of joining the FOP output and a PDF together. This involves

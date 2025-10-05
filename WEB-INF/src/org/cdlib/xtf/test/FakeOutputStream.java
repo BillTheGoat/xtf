@@ -31,7 +31,7 @@ package org.cdlib.xtf.test;
  */
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import javax.servlet.ServletOutputStream;
+import jakarta.servlet.ServletOutputStream;
 
 /**
  * Used to gather output from dynaXML or crossQuery during a test.
@@ -55,4 +55,14 @@ public class FakeOutputStream extends ServletOutputStream
   public String toString() {
     return buf.toString();
   }
+
+@Override
+public boolean isReady() {
+    return true;
+}
+
+@Override
+public void setWriteListener(jakarta.servlet.WriteListener writeListener) {
+    // Not implemented for this test class
+}
 } // class FakeOutputStream

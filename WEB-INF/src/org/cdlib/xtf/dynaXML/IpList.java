@@ -34,6 +34,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.io.Reader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -294,50 +296,54 @@ class IpList
     throws IOException 
   {
     Reader rawReader;
-    if (path.startsWith("http://")) {
-      URLConnection conn = new URL(path).openConnection();
-      conn.setAllowUserInteraction(false);
-      conn.setDoInput(true);
-      conn.setDoOutput(false);
-      conn.setUseCaches(false);
-      conn.connect();
-      rawReader = new InputStreamReader(conn.getInputStream());
-    }
-    else
-      rawReader = new FileReader(path);
-
-    // Open the file for reading line-by-line.
-    LineNumberReader reader = new LineNumberReader(rawReader);
-
-    // Process each line in turn.
-    while (true) 
-    {
-      String line = reader.readLine();
-      if (line == null)
-        break;
-
-      // Strip leading and trailing whitespace.
-      line = line.trim();
-
-      // Skip blank lines.
-      if (line.equals(""))
-        continue;
-
-      // Lines beginning with numbers specify positive IP addresses
-      if (Character.isDigit(line.charAt(0)) || (line.charAt(0) == '*')) {
-        processEntry(line, true);
+    try {
+      if (path.startsWith("http://")) {
+            URLConnection conn = new URI(path).toURL().openConnection();
+            conn.setAllowUserInteraction(false);
+            conn.setDoInput(true);
+            conn.setDoOutput(false);
+            conn.setUseCaches(false);
+            conn.connect();
+            rawReader = new InputStreamReader(conn.getInputStream());
       }
-
-      // Lines beginning with "exclude" specify negative IP addresses
-      else if (line.startsWith("exclude")) {
-        line = line.substring(7).trim();
-        processEntry(line, false);
-      }
-
-      // Ignore other kinds of lines.
       else
-        continue;
-    }
+        rawReader = new FileReader(path);
+
+      // Open the file for reading line-by-line.
+      LineNumberReader reader = new LineNumberReader(rawReader);
+
+      // Process each line in turn.
+      while (true) 
+      {
+        String line = reader.readLine();
+        if (line == null)
+          break;
+
+        // Strip leading and trailing whitespace.
+        line = line.trim();
+
+        // Skip blank lines.
+        if (line.equals(""))
+          continue;
+
+        // Lines beginning with numbers specify positive IP addresses
+        if (Character.isDigit(line.charAt(0)) || (line.charAt(0) == '*')) {
+          processEntry(line, true);
+        }
+
+        // Lines beginning with "exclude" specify negative IP addresses
+        else if (line.startsWith("exclude")) {
+          line = line.substring(7).trim();
+          processEntry(line, false);
+        }
+
+        // Ignore other kinds of lines.
+        else
+          continue;
+      }
+    } catch (URISyntaxException | IOException e) {
+          e.printStackTrace();
+      }
   } // readMap()
 
   /**

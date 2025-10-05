@@ -226,7 +226,7 @@ public class DefaultDocLocator implements DocLocator
 
     // Make the input source, and give it a real system ID.
     InputSource inSrc = new InputSource(inStream);
-    inSrc.setSystemId(new File(sourcePath).toURL().toString());
+    inSrc.setSystemId(new File(sourcePath).toURI().toURL().toString());
 
     // All done!
     return inSrc;
@@ -294,7 +294,7 @@ public class DefaultDocLocator implements DocLocator
                                                                       removeDoctypeDecl));
   
       // Put a proper system ID onto the InputSource.
-      inSrc.setSystemId(new File(sourcePath).toURL().toString());
+      inSrc.setSystemId(new File(sourcePath).toURI().toURL().toString());
   
       // Make a DefaultHandler that will pass events to the lazy receiver.
       LazyPassthru passthru = new LazyPassthru(lazyHandler, stripWhitespace);

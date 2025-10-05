@@ -69,7 +69,7 @@ public class TotalHitsComparator implements SortComparatorSource
      */
     public Comparable sortValue(ScoreDoc doc) {
       assert doc instanceof DocHit;
-      return new Integer(((DocHit)doc).totalSnippets());
+      return Integer.valueOf(((DocHit) doc).totalSnippets());
     }
 
     /**

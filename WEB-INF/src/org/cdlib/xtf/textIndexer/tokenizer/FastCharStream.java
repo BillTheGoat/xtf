@@ -99,10 +99,11 @@ public final class FastCharStream implements CharStream {
       System.err.println("Caught: " + e + "; ignoring.");
     }
   }
-
+  @SuppressWarnings("deprecation")
   public final int getColumn() {
     return bufferStart + bufferPosition;
   }
+  @SuppressWarnings("deprecation")
   public final int getLine() {
     return 1;
   }

@@ -34,6 +34,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.lang.ref.Cleaner;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -72,6 +73,12 @@ import org.apache.lucene.util.ProgressTracker;
  */
 public class SpellWriter 
 {
+  /** Cleaner for automatic resource cleanup as a fallback */
+  private static final Cleaner CLEANER = Cleaner.create();
+
+  /** Cleaner registration for automatic cleanup */
+  private Cleaner.Cleanable cleanable;
+
   /** Directory to store the spelling dictionary in */
   private File spellIndexDir;
 
@@ -151,6 +158,38 @@ public class SpellWriter
    * static {@link #open(File)} method.
    */
   private SpellWriter() {
+  }
+
+  /**
+   * Cleanup action that will be invoked by the Cleaner.
+   * Must not hold a reference to the SpellWriter instance.
+   */
+  private static class CleanupAction implements Runnable {
+    private final PrintWriter wordWriter;
+    private final PrintWriter pairWriter;
+    
+    CleanupAction(PrintWriter wordWriter, PrintWriter pairWriter) {
+      this.wordWriter = wordWriter;
+      this.pairWriter = pairWriter;
+    }
+    
+    @Override
+    public void run() {
+      if (wordWriter != null) {
+        try {
+          wordWriter.close();
+        } catch (Exception e) {
+          // Silently ignore - this is best-effort cleanup
+        }
+      }
+      if (pairWriter != null) {
+        try {
+          pairWriter.close();
+        } catch (Exception e) {
+          // Silently ignore - this is best-effort cleanup
+        }
+      }
+    }
   }
 
   /**
@@ -242,6 +281,12 @@ public class SpellWriter
   public synchronized void close()
     throws IOException 
   {
+      // Clean the Cleaner registration
+    if (cleanable != null) {
+      cleanable.clean();
+      cleanable = null;
+    }
+  
     closeQueueWriters();
   }
 
@@ -955,7 +1000,7 @@ public class SpellWriter
 
   /** Opens the word queue writer. */
   private void openWordQueueWriter()
-    throws IOException 
+  throws IOException 
   {
     // If already open, skip re-opening.
     if (wordQueueWriter != null)
@@ -966,6 +1011,9 @@ public class SpellWriter
       new BufferedWriter(
         new OutputStreamWriter(new FileOutputStream(wordQueueFile, true),
                                "UTF-8")));
+    
+    // Register cleanup action
+    registerCleanup();
   }
 
   /** Opens the pair queue writer. */
@@ -980,7 +1028,18 @@ public class SpellWriter
       new BufferedWriter(
         new OutputStreamWriter(new FileOutputStream(pairQueueFile, true),
                                "UTF-8")));
+    // Register cleanup action
+    registerCleanup();
   } // openQueueWriters()
+
+  /** Register or re-register the cleanup action */
+  private void registerCleanup() 
+  {
+    if (cleanable != null) {
+      cleanable.clean();
+    }
+    cleanable = CLEANER.register(this, new CleanupAction(wordQueueWriter, pairQueueWriter));
+  }
 
   /** Closes the queue writers if either are open */
   private void closeQueueWriters()
@@ -1002,9 +1061,4 @@ public class SpellWriter
     return doubleMetaphone.doubleMetaphone(word);
   }
 
-  protected void finalize()
-    throws Throwable 
-  {
-    close();
-  }
 } // class SpellWriter

@@ -2,3 +2,22 @@ The official change log is now on the XTF wiki:
 
     http://xtf.wiki.sourceforge.net
 
+2025.10.21:
+    Updated to run on Tomcat 10 and Java 21. Updates will probably run using as old as JDK 8, but that has not been tested.
+
+    Details:
+        Ran "javax2jakarta -profile=EE" from Apache Tomcat to update to jakarta namespace where required
+        Updated all lib jars to the latest version possible. See the VERSIONS file in the lib directory for more information
+
+        Refactored several classes to use the latest jars
+        Refactored to resolve all "Deprecated and Marked for Removal", as well as all "Deprecated" Warnings to avoid unexpected failures in the future.
+
+        Added Mozilla library java port (juniversalchardet-2.5.0.jar) to test for jTidy input encoding to improve workflow. Defaults to utf-8 if detection fails. Improved invalid character handling on output.
+            TODO: html should also be saved as lazy files.
+
+        Added testing for marc encoding (utf-8, marc8, ISO-8859-1), now checks for .marc, .mrc, .marc8 extensions.
+            TODO: marc can be indexed and searched, but display dosn't work. Browser just downloads the entire indexed marc file. 
+            There should be style sheets for marcXML indexing and display, and binary marc files should be saved as marcXML. They are converted for indexing anyways.
+            Various formats of marc files should be included in the sample data.
+
+    TODO: there are many "unchecked / unsafe" compiler warnings due to the older code base. At least the highest priority warnings should be refactored.

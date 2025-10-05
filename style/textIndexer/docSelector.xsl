@@ -229,7 +229,7 @@
          </xsl:when>
 
          <!-- MARC files -->
-         <xsl:when test="ends-with(@fileName, '.mrc')">
+         <xsl:when test="ends-with(@fileName, '.mrc') or ends-with(@fileName, '.marc') or ends-with(@fileName, '.marc8')">
             <indexFile fileName="{@fileName}" 
                type="MARC"
                preFilter="local/style/textIndexer/default/defaultPreFilter.xsl"/>

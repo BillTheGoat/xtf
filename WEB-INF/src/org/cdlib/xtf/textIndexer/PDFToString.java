@@ -31,10 +31,17 @@ package org.cdlib.xtf.textIndexer;
  */
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+
+import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.util.PDFTextStripper;
+import org.apache.pdfbox.text.PDFTextStripper;
 import org.cdlib.xtf.util.*;
 
+import java.util.logging.Logger;
+import java.util.logging.Level;
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
@@ -47,7 +54,10 @@ import org.cdlib.xtf.util.*;
  */
 public class PDFToString 
 {
-  static boolean mustConfigureLogger = true;
+  /*static {
+        Logger.getLogger("org.apache.pdfbox").setLevel(Level.SEVERE);
+        Logger.getLogger("org.apache.fontbox").setLevel(Level.SEVERE);
+      }*/
 
   /** PDFBox text stripper. Created once to save time. */
   static PDFTextStripper stripper;
@@ -88,7 +98,11 @@ public class PDFToString
       try 
       {
         // Get hold of the PDF document to convert.
-        pdfDoc = PDDocument.load(PDFInputStream);
+        // pdfDoc = PDDocument.load(PDFInputStream);
+        File tempFile = File.createTempFile("pdf-", ".pdf");
+        tempFile.deleteOnExit();
+        Files.copy(PDFInputStream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        pdfDoc = Loader.loadPDF(tempFile);
 
         // If the document is encrypted, we've got a problem.
         if (pdfDoc.isEncrypted()) {

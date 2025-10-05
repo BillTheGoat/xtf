@@ -7,10 +7,12 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.cdlib.xtf.saxonExt.ElementWithContent;
 import org.cdlib.xtf.saxonExt.InstructionWithContent;
@@ -82,7 +84,7 @@ public class PipeRequestElement extends ElementWithContent
      */
     @Override
     public TailCall processLeavingTail(XPathContext context) 
-      throws XPathException 
+      throws XPathException
     {
       byte[] buf = null;
       OutputStream postOut = null;
@@ -92,9 +94,9 @@ public class PipeRequestElement extends ElementWithContent
       // Build the full URL
       URL fullURL = null;
       try {
-        fullURL = new URL(attribs.get("url").evaluateAsString(context));
+        fullURL = new URI(attribs.get("url").evaluateAsString(context)).toURL();
       }
-      catch (MalformedURLException e) {
+      catch (Exception e) {
         dynamicError("'url' must be a well-formed URL", "PIPE_REQ_001", context);
       }
 

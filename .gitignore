@@ -5,6 +5,7 @@ index-pending
 index-spare
 WEB-INF/classes
 WEB-INF/lib/src
+WEB-INF/lib/fop-all-2.11.jar
 WEB-INF/dist
 WEB-INF/javadoc
 regress/**/IndexDB

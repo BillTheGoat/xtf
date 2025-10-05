@@ -72,7 +72,7 @@ public class PDFIndexSource extends XMLIndexSource
 
     // And make an InputSource with a proper system ID
     InputSource finalSrc = new InputSource(new StringReader(pdfXMLStr));
-    finalSrc.setSystemId(pdfFile.toURL().toString());
+    finalSrc.setSystemId(pdfFile.toURI().toURL().toString());
     return finalSrc;
   } // filterInput()
 } // class PDFSrcFile

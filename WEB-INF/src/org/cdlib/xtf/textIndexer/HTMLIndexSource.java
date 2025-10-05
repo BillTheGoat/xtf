@@ -72,7 +72,7 @@ public class HTMLIndexSource extends XMLIndexSource
 
     // And make an InputSource with a proper system ID
     InputSource finalSrc = new InputSource(new StringReader(htmlXMLStr));
-    finalSrc.setSystemId(htmlFile.toURL().toString());
+    finalSrc.setSystemId(htmlFile.toURI().toURL().toString());
     return finalSrc;
   } // filterInput()
 } // class HTMLIndexSource

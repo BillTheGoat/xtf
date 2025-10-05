@@ -589,7 +589,7 @@ public class SrcTreeProcessor
         format = "MSWord";
       else if (lcFileName.endsWith(".txt"))
         format = "Text";
-      else if (lcFileName.endsWith(".marc") || lcFileName.endsWith(".mrc"))
+      else if (lcFileName.endsWith(".marc") || lcFileName.endsWith(".mrc") || lcFileName.endsWith(".marc8"))
         format = "MARC";
       else {
         Trace.warning(
@@ -608,7 +608,7 @@ public class SrcTreeProcessor
                                       cfgInfo.indexInfo, srcPath);
 
     // Calculate a proper system ID for this file.
-    String systemId = srcPath.toURL().toString();
+    String systemId = srcPath.toURI().toURL().toString();
 
     // Figure out where to put the lazy file (if we've been asked to build one)
     StructuredStore lazyStore = null;

@@ -37,6 +37,8 @@ package org.cdlib.xtf.textEngine;
  */
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -767,26 +769,38 @@ public class DefaultQueryProcessor extends QueryProcessor
     DynamicGroupData dynData = null;
     try {
       Class c = Class.forName(className);
-      dynData = (DynamicGroupData)c.newInstance();
+      dynData = (DynamicGroupData)c.getDeclaredConstructor().newInstance();
     }
     catch (ClassNotFoundException e) {
       throw new RuntimeException(
         "Dynamic facet class '" + className + "' not found");
     }
-    catch (InstantiationException e) {
-      throw new RuntimeException(
-        "Cannot instantiate dynamic facet class '" + className + "'",
-        e);
-    }
-    catch (IllegalAccessException e) {
-      throw new RuntimeException(
-        "Cannot instantiate dynamic facet class '" + className + "'",
-        e);
-    }
     catch (ClassCastException e) {
       throw new RuntimeException(
         "Class '" + className + "' must be derived from DynamicGroupData");
     }
+    catch (InstantiationException e) {
+      throw new RuntimeException(
+        "InstantiationException on dynamic facet class '" + className + "'",
+        e);
+    }
+    catch (IllegalAccessException e) {
+      throw new RuntimeException(
+        "IllegalAccessException on dynamic facet class '" + className + "'",
+        e);
+    }
+    catch (NoSuchMethodException e) {
+      throw new RuntimeException(
+        "NoSuchMethodException on dynamic facet class '" + className + "'",
+        e);
+    }
+    catch (InvocationTargetException e) {
+      throw new RuntimeException(
+        "InvocationTargetException on dynamic facet class '" + className + "'",
+        e);
+    }
+
+
 
     // Initialize the new instance, and we're done.
     dynData.init(indexReader, tokFields, params);

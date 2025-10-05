@@ -38,8 +38,8 @@ import java.net.SocketException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Properties;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Source;
 import javax.xml.transform.Templates;
@@ -669,7 +669,7 @@ public class DynaXML extends TextServlet
       // Try to create an object of the correct class.
       if (className != null)
         theClass = Class.forName(className);
-      DocLocator loc = (DocLocator)theClass.newInstance();
+      DocLocator loc = (DocLocator)theClass.getDeclaredConstructor().newInstance();
       loc.setServlet(this);
       return loc;
     }
