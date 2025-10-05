@@ -31,7 +31,7 @@ package org.cdlib.xtf.textEngine;
 import java.io.File;
 import java.io.IOException;
 
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;

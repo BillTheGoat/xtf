@@ -36,7 +36,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.cdlib.xtf.saxonExt.ElementWithContent;
 import org.cdlib.xtf.saxonExt.InstructionWithContent;

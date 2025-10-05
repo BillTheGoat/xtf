@@ -297,7 +297,7 @@ public class FileSorter
     Collections.sort(curBlockLines);
 
     // Record the block's starting offset in the temp file.
-    blockOffsets.add(new Long(tmpFile.length()));
+    blockOffsets.add(Long.valueOf(tmpFile.length()));
 
     // Open the temp file and record the offset of the new block.
     FileOutputStream tmpOut = new FileOutputStream(tmpFile, true);

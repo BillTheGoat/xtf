@@ -31,7 +31,7 @@ package org.cdlib.xtf.servletBase;
  */
 import java.io.IOException;
 import java.io.OutputStream;
-import javax.servlet.ServletOutputStream;
+import jakarta.servlet.ServletOutputStream;
 import org.cdlib.xtf.util.Trace;
 
 /**
@@ -55,6 +55,16 @@ class LatencyCutoffStream extends ServletOutputStream
     this.url = url;
     this.reqStartTime = reqStartTime;
   }
+
+@Override
+public boolean isReady() {
+    return true;
+}
+
+@Override
+public void setWriteListener(jakarta.servlet.WriteListener writeListener) {
+    // Not implemented for this test class
+}
 
   /** Close the output stream */
   public void close()

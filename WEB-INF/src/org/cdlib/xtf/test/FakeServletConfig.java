@@ -30,8 +30,8 @@ package org.cdlib.xtf.test;
  * POSSIBILITY OF SUCH DAMAGE.
  */
 import java.util.Enumeration;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
 
 /**
  * Used to abuse dynaXML and crossQuery, providing them only as much context

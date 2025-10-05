@@ -31,7 +31,7 @@ package org.cdlib.xtf.saxonExt.redirect;
 
 import java.io.IOException;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SimpleExpression;

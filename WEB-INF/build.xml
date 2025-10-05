@@ -15,7 +15,7 @@
   <property name="doc"     location="javadoc"/>
   <property name="lucene-jar" location="${lib}/lucene-core-2.1.0.jar"/>
   <property name="saxon-jar" location="${lib}/saxonb-8.9.jar"/>
-  <property name="libs"    value="${lucene-jar}:${saxon-jar}:${lib}/servlet.jar:${lib}/pdfBox.jar:${lib}/fontBox.jar:${lib}/log4j-1.2.9.jar:${lib}/Tidy.jar:${lib}/cql-java.jar:${lib}/marc4j.jar:${lib}/activation.jar:${lib}/mail.jar:${lib}/tm-extractors-1.0.jar:${lib}/poi-3.0.2-FINAL.jar:${lib}/fop-core-0.95.jar:${lib}/fop-libs-0.95.jar:${lib}/iText.jar"/>
+  <property name="libs"    value="${lucene-jar}:${saxon-jar}:${lib}/jakarta.servlet-api.jar:${lib}/pdfBox.jar:${lib}/fontBox.jar:${lib}/log4j-1.2.9.jar:${lib}/Tidy.jar:${lib}/cql-java.jar:${lib}/marc4j.jar:${lib}/activation.jar:${lib}/mail.jar:${lib}/tm-extractors-1.0.jar:${lib}/poi-3.0.2-FINAL.jar:${lib}/fop-core-0.95.jar:${lib}/fop-libs-0.95.jar:${lib}/iText.jar"/>
 
   <target name="init">
     <!-- Create the time stamp -->
@@ -28,8 +28,8 @@
   <target name="compile" depends="init"
         description="compile the source " >
     <!-- Compile the java code from ${src} into ${classes} -->
-    <javac target="1.5" 
-           source="1.5" 
+    <javac target="11" 
+           source="11" 
            debug="true"
            classpath="${libs}"
            encoding="UTF-8"
@@ -109,7 +109,7 @@
       <fileset dir="." includes="contrib/**/*.html"/>
       <fileset dir="." includes="lib/lucene*.jar"/> <!-- Normally part of xtf.jar, needed for build -->
       <fileset dir="." includes="lib/saxon*.jar"/> <!-- Normally part of xtf.jar, needed for build -->
-      <fileset dir="." includes="lib/servlet.jar"/> <!-- Only needed for source build -->
+      <fileset dir="." includes="lib/jakarta.servlet-api.jar"/> <!-- Only needed for source build -->
     </zip>
 
     <!-- Zip up the JavaDocs -->
@@ -164,7 +164,7 @@
         <include name="WEB-INF/web.xml"/>
         <include name="WEB-INF/lib/versions.txt"/>
         <include name="WEB-INF/lib/*.jar"/>
-        <exclude name="WEB-INF/lib/servlet.jar"/> <!-- only needed in src.zip -->
+        <exclude name="WEB-INF/lib/jakarta.servlet-api.jar"/> <!-- only needed in src.zip -->
         <exclude name="WEB-INF/lib/lucene-*.jar"/> <!-- Included in xtf.jar -->
         <exclude name="WEB-INF/lib/saxon*.jar"/> <!-- Included in xtf.jar -->
 
@@ -218,7 +218,7 @@
     <javadoc destdir="${doc}" 
              private="true" 
              breakiterator="yes"
-             source="1.5"
+             source="11"
              encoding="UTF-8"
              classpath="${libs}"
              noqualifier="all">

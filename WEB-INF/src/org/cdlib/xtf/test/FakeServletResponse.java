@@ -32,10 +32,10 @@ package org.cdlib.xtf.test;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Locale;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
+import java.util.Collection;
 /**
  * Used to gather the response from crossQuery or dynaXML during a test.
  *
@@ -200,4 +200,42 @@ public class FakeServletResponse implements HttpServletResponse
   public void setLocale(Locale loc) {
     assert false;
   }
+
+@Override
+public Collection<String> getHeaderNames() {
+    return new java.util.ArrayList<String>();
+}
+
+@Override
+public Collection<String> getHeaders(String name) {
+    return new java.util.ArrayList<String>();
+}
+
+@Override
+public String getHeader(String name) {
+    return null;
+}
+
+@Override
+public void setTrailerFields(java.util.function.Supplier<java.util.Map<String, String>> supplier) {
+    // Not implemented for this test class
+}
+
+@Override
+public java.util.function.Supplier<java.util.Map<String, String>> getTrailerFields() {
+    return null;
+}
+@Override
+public int getStatus() {
+    return 200;
+}
+@Override
+public void sendRedirect(String location, int sc, boolean clearBuffer) throws java.io.IOException {
+    // Not implemented for this test class
+}
+@Override
+public void setContentLengthLong(long len) {
+    // Not implemented for this test class
+}
+
 }

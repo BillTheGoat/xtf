@@ -73,7 +73,7 @@ public class TagArray
     Integer lookup = (Integer)typeTable.get(t);
     if (lookup == null) {
       assert nTypes < 127 : "Too many types allocated - change tagType from byte to short";
-      lookup = new Integer(nTypes);
+      lookup = Integer.valueOf(nTypes);
       typeTable.put(t, lookup);
       nTypes++;
     }

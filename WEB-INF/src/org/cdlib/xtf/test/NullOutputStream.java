@@ -30,7 +30,7 @@ package org.cdlib.xtf.test;
  * POSSIBILITY OF SUCH DAMAGE.
  */
 import java.io.IOException;
-import javax.servlet.ServletOutputStream;
+import jakarta.servlet.ServletOutputStream;
 
 /**
  * Used to simulate gathering (but actually throw away) output from dynaXML or 
@@ -50,4 +50,15 @@ public class NullOutputStream extends ServletOutputStream
   public String toString() {
     return "";
   }
+
+@Override
+public boolean isReady() {
+    return true;
+}
+
+@Override
+public void setWriteListener(jakarta.servlet.WriteListener writeListener) {
+    // Not implemented for this test class
+}
+
 } // class NullOutputStream

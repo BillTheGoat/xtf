@@ -38,9 +38,9 @@ import java.util.Vector;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.cdlib.xtf.cache.*;
 import org.cdlib.xtf.util.*;
 
@@ -259,7 +259,7 @@ class Authenticator
     // the password from the user.
     //
     if (session.getAttribute("LDAP_attempted") == null) {
-      session.setAttribute("LDAP_attempted", new Boolean(true));
+      session.setAttribute("LDAP_attempted", Boolean.TRUE);
       Trace.debug(
         "New session (" + session.getId() + ")... " +
         "forcing re-authentication");
@@ -367,7 +367,7 @@ class Authenticator
       res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
       // Don't force re-re-authentication.
-      session.setAttribute("LDAP_attempted", new Boolean(true));
+      session.setAttribute("LDAP_attempted", Boolean.TRUE);
 
       throw new NoPermissionException(e);
     }
