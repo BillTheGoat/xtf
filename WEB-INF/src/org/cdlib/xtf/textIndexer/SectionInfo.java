@@ -80,7 +80,7 @@ public class SectionInfo
   /** Index/No-Index Flag Value: Use parent section index/no-index state.
    *  <br><br>
    *
-   *  @.notes
+   *  Notes: 
    *  This index flag value is never actually stored in the index flag attribute
    *  for a <code>SectionInfo</code> instance. It is only passed as an argument
    *  to the
@@ -122,7 +122,7 @@ public class SectionInfo
    *  field indicates that the parent's section bump value should be used.
    *  <br><br>
    *
-   *  @.notes
+   *  Notes: 
    *  This section bump value is never actually stored in the section bump
    *  attribute for a <code>SectionInfo</code> instance. It is only passed as
    *  an argument to the
@@ -205,7 +205,7 @@ public class SectionInfo
   /** Spell/No-Spell Flag Value: Use parent section spell/no-spell state.
    *  <br><br>
    *
-   *  @.notes
+   *  Notes: 
    *  This spell flag value is never actually stored in the spell flag attribute
    *  for a <code>SectionInfo</code> instance. It is only passed as an argument
    *  to the
@@ -269,7 +269,7 @@ public class SectionInfo
    *  {@link org.cdlib.xtf.textIndexer.SectionInfo#noIndex noIndex},
    *  and {@link org.cdlib.xtf.textIndexer.SectionInfo#index index}.
    *
-   *  @.notes
+   *  Notes: 
    *  The value {@link org.cdlib.xtf.textIndexer.SectionInfo#parentIndex parentIndex}
    *  is never actually stored in the index flag attribute for a
    *  <code>SectionInfo</code> instance. It is only passed as an argument to the
@@ -305,7 +305,7 @@ public class SectionInfo
    *  This field is used correctly accumulate section bump values when multiple
    *  nested sections starts are encountered with no intervening text.
    *
-   *  @.notes
+   *  Notes: 
    *  The value {@link org.cdlib.xtf.textIndexer.SectionInfo#parentSectionBump parentSectionBump}
    *  is never actually stored in the sectionBump attribute for a
    *  <code>SectionInfo</code> instance. It is only passed as an argument to the
@@ -343,7 +343,7 @@ public class SectionInfo
    *  {@link org.cdlib.xtf.textIndexer.SectionInfo#noSpell noSpell},
    *  and {@link org.cdlib.xtf.textIndexer.SectionInfo#spell spell}.
    *
-   *  @.notes
+   *  Notes: 
    *  The value {@link org.cdlib.xtf.textIndexer.SectionInfo#parentSpell parentSpell}
    *  is never actually stored in the spell flag attribute for a
    *  <code>SectionInfo</code> instance. It is only passed as an argument to the
@@ -382,7 +382,7 @@ public class SectionInfo
    *  Initializes all the fields in a <code>SectionInfo</code> instance to
    *  reasonable default values. <br><br>
    *
-   *  @.notes
+   *  Notes: 
    *  See the {@link org.cdlib.xtf.textIndexer.SectionInfo#defaultDepth},
    *  {@link org.cdlib.xtf.textIndexer.SectionInfo#defaultIndexFlag},
    *  {@link org.cdlib.xtf.textIndexer.SectionInfo#defaultSectionType},
@@ -440,7 +440,7 @@ public class SectionInfo
    *
    *  @return    The previous section bump value saved.<br><br>
    *
-   *  @.notes
+   *  Notes: 
    *     Once saved, the
    *     {@link org.cdlib.xtf.textIndexer.SectionInfo#sectionBump sectionBump}
    *     field is reset to zero in anticipation of accumulating bump values

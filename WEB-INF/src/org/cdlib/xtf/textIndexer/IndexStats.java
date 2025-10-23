@@ -65,9 +65,9 @@ public class IndexStats
    *  @param  args    Command line arguments to process. The command line
    *  arguments required by the IndexStats program are as follows:
    *
-   * <blockquote dir=ltr style="MARGIN-RIGHT: 0px"><code>
-   * <b>IndexStats {-config</b> <font color=#0000ff><i>CfgFilePath</i></font>}
-   * <b>-index</b> <font color=#0000ff><i>IndexName</i></font> }+
+   * <blockquote style="MARGIN-RIGHT: 0px"><code>
+   * <b>IndexStats {-config</b> <i>CfgFilePath</i>}
+   * <b>-index</b> <i>IndexName</i> }+
    * </b></code></blockquote>
    *
    * For a complete description of each command line argument, see the

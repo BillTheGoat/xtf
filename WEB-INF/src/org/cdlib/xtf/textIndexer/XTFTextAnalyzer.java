@@ -51,7 +51,7 @@ import org.cdlib.xtf.util.WordMap;
  *
  *  Within this analyzer, there are four main phases:
  *
- *  <blockquote dir=ltr style="MARGIN-RIGHT: 0px">
+ *  <blockquote style="MARGIN-RIGHT: 0px">
  *    <u>Tokenizing</u><br>
  *    The first phase is the conversion of the contiguous text into a list of
  *    separate tokens. This step is performed by the {@link FastTokenizer}
@@ -178,7 +178,7 @@ public class XTFTextAnalyzer extends Analyzer
    *                    when filtering text. See
    *                    {@link IndexInfo#accentMapPath} for more information.
    *
-   *  @.notes
+   *  Notes: 
    *    Use this method to initialize an instance of an
    *    <code>XTFTextAnalyzer</code> and pass it to a Lucene
    *    <code>IndexWriter</code> instance. Lucene will then call the

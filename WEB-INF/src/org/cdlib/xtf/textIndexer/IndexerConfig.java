@@ -230,7 +230,7 @@ public class IndexerConfig
    *                   argument processing the next time this function is
    *                   called.
    *
-   *  @.notes          This function looks for the following command line
+   *  Notes:           This function looks for the following command line
    *                   flags: <br><br>
    *
    *                   -config {path}  (exactly one required)<br>

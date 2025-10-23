@@ -67,7 +67,7 @@ public class IdxTreeDictMaker
    *                     directory of a tree containing multiple indices.
    *                     <br><br>
    *
-   * @.notes             This method also calls itself recursively to process
+   * Notes:              This method also calls itself recursively to process
    *                     potential index sub-directories below the passed
    *                     directory.
    */

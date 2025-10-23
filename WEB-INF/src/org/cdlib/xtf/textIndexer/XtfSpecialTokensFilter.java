@@ -85,7 +85,7 @@ public class XtfSpecialTokensFilter extends TokenFilter
    *  @param  srcText    The original source text chunk from wich the source
    *                     token stream was derived. <br><br>
    *
-   * @.notes
+   * Notes: 
    *    This class stores a reference to the original chunk of text from which
    *    the source token stream is derived. This is so that the filter can
    *    perform look-back and look-ahead operations to identify special token
@@ -112,7 +112,7 @@ public class XtfSpecialTokensFilter extends TokenFilter
    *                        character processing performed by this function.
    *                        <br><br>
    *
-   *  @.notes
+   *  Notes: 
    *    For more information about the filtering performed by this function,
    *    see the {@link XtfSpecialTokensFilter} class description. <br><br>
    */

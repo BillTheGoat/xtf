@@ -54,10 +54,10 @@ import java.util.logging.Level;
  */
 public class PDFToString 
 {
-  /*static {
+  static {
         Logger.getLogger("org.apache.pdfbox").setLevel(Level.SEVERE);
         Logger.getLogger("org.apache.fontbox").setLevel(Level.SEVERE);
-      }*/
+      }
 
   /** PDFBox text stripper. Created once to save time. */
   static PDFTextStripper stripper;

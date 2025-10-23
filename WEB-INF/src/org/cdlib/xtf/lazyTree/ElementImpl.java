@@ -128,7 +128,7 @@ public class ElementImpl extends ParentNodeImpl
    *         If the bottom half is zero, then this is a namespace undeclaration rather than a declaration.
    *         The XML namespace is never included in the list. If the supplied array is larger than required,
    *         then the first unused entry will be set to -1.
-   *         <p/>
+   *         
    *         <p>For a node other than an element, the method returns null.</p>
    */
   public int[] getDeclaredNamespaces(int[] buffer) {
@@ -149,7 +149,7 @@ public class ElementImpl extends ParentNodeImpl
    *         If the bottom half is zero, then this is a namespace undeclaration rather than a declaration.
    *         The XML namespace is never included in the list. If the supplied array is larger than required,
    *         then the first unused entry will be set to -1.
-   *         <p/>
+   *         
    *         <p>For a node other than an element, the method returns null.</p>
    */
   static int[] getDeclaredNamespaces(LazyDocument doc, int nodeNr,

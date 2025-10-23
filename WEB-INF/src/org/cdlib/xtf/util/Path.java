@@ -167,7 +167,7 @@ public class Path
    *  @return
    *    A normalized version of the original file name string passed.
    *
-   *  @.notes
+   *  Notes: 
    *    This function does its work by calling the
    *    {@link Path#normalizePath(String) normalizePath() }
    *    function to normalize the filename and path (if any), and then
@@ -199,7 +199,7 @@ public class Path
    *  @return
    *    A normalized version of the original file name string passed.
    *
-   *  @.notes
+   *  Notes: 
    *    This function does its work by calling the
    *    {@link Path#normalizePath(String) normalizePath() }
    *    function to normalize the filename and path (if any). If the original
@@ -227,7 +227,7 @@ public class Path
    *    <code>false</code> - An file system path was <b>not</b> created
    *                         due to errors. <br><br>
    *
-   *  @.notes
+   *  Notes: 
    *    This method calls the function
    *    {@link Path#normalizePath(String) normalizePath()} to help ensure the
    *    successful creation of the specified path. <br><br>

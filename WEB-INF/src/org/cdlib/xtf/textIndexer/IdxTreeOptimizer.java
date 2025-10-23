@@ -75,7 +75,7 @@ public class IdxTreeOptimizer
    *                     function, which is called for each index sub-directory
    *                     found. <br><br>
    *
-   * @.notes             This method also calls itself recursively to process
+   * Notes:              This method also calls itself recursively to process
    *                     potential index sub-directories below the passed
    *                     directory.
    */

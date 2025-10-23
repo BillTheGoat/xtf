@@ -593,12 +593,12 @@ public class CrossQuery extends TextServlet
         out.append("<a href=\"" + prevUrl +
                    "\" target=\"_top\">[Previous]</a> ");
       else
-        out.append("<font color=\"#C0C0C0\">[Previous]</font> ");
+        out.append("[Previous] ");
 
       if (stepNum < 5)
         out.append("<a href=\"" + nextUrl + "\" target=\"_top\">[Next]</a>");
       else
-        out.append("<font color=\"#C0C0C0\">[Next]</font>");
+        out.append("[Next]");
 
       out.append(
         "    <table cellspacing=\"5\" cellpadding=\"0\">\n" + "      <tr>\n");

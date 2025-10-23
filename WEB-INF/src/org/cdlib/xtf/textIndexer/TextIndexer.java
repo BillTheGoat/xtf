@@ -54,11 +54,11 @@ import org.cdlib.xtf.util.Trace;
  * in order to index source XML files into one or more Lucene databases. The
  * command line arguments required by the TextIndexer program are as follows:
  *
- * <blockquote dir=ltr style="MARGIN-RIGHT: 0px"><code>
- * <b>TextIndexer -config</b> <font color=#0000ff><i>CfgFilePath</i></font>
+ * <blockquote style="MARGIN-RIGHT: 0px"><code>
+ * <b>TextIndexer -config</b> <i>CfgFilePath</i>
  * { {<b>-clean</b>|<b>-incremental</b>}?
  * {<b>-trace errors</b>|<b>warnings</b>|<b>info</b>|<b>debug</b>}?
- * <b>-index</b> <font color=#0000ff><i>IndexName</i></font> }+
+ * <b>-index</b> <i>IndexName</i> }+
  * </b></code></blockquote>
  *
  * The <code>-config</code> argument identifies an XML configuration file that
@@ -89,7 +89,7 @@ import org.cdlib.xtf.util.Trace;
  * of output displayed by the text indexer. The output levels are defined as
  * follows:
  *
- * <blockquote dir=ltr style="MARGIN-RIGHT: 0px">
+ * <blockquote style="MARGIN-RIGHT: 0px">
  *   <code>errors</code>  - Only error messages are displayed. <br>
  *   <code>warnings</code> -  Both error and warning messages are displayed. <br>
  *   <code>info</code> - Error, warning, and informational messages are displayed. <br>
@@ -111,7 +111,7 @@ import org.cdlib.xtf.util.Trace;
  * look like this:
  * <br><br>
  *
- *   <code><blockquote dir=ltr style="MARGIN-RIGHT: 0px"><b>
+ *   <code><blockquote style="MARGIN-RIGHT: 0px"><b>
  *   TextIndexer -config IdxConfig.xml -clean -index AllText
  *   </b></blockquote></code>
  *
@@ -143,11 +143,11 @@ public class TextIndexer
    *  @param  args    Command line arguments to process. The command line
    *  arguments required by the TextIndexer program are as follows:
    *
-   * <blockquote dir=ltr style="MARGIN-RIGHT: 0px"><code>
-   * <b>TextIndexer -config</b> <font color=#0000ff><i>CfgFilePath</i></font>
+   * <blockquote style="MARGIN-RIGHT: 0px"><code>
+   * <b>TextIndexer -config</b> <i>CfgFilePath</i>
    * { {<b>-clean</b>|<b>-incremental</b>}?
    * {<b>-trace errors</b>|<b>warnings</b>|<b>info</b>|<b>debug</b>}?
-   * <b>-index</b> <font color=#0000ff><i>IndexName</i></font> }+
+   * <b>-index</b> <i>IndexName</i> }+
    * </b></code></blockquote>
    *
    * For a complete description of each command line argument, see the

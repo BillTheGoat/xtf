@@ -49,8 +49,7 @@ import javax.xml.transform.Templates;
 import org.apache.lucene.util.CountedInputStream;
 import org.cdlib.xtf.util.Normalizer;
 import org.cdlib.xtf.util.StructuredStore;
-import org.marc4j.MarcReader;
-import org.marc4j.MarcStreamReader;
+import org.marc4j.MarcPermissiveStreamReader;
 import org.marc4j.MarcXmlWriter;
 import org.marc4j.marc.Record;
 import org.xml.sax.Attributes;
@@ -228,29 +227,6 @@ public class MARCIndexSource extends IndexSource
   } // openFile()
 
   /**
-   * Detect encoding from MARC leader byte 9
-   */
-  private String detectMarcEncoding(InputStream inputStream) throws IOException {
-    inputStream.mark(24);
-    byte[] leader = new byte[24];
-    int bytesRead = inputStream.read(leader);
-    inputStream.reset();
-    
-    if (bytesRead >= 24) {
-      char encodingByte = (char) leader[9];
-      switch (encodingByte) {
-        case 'a':
-          return "UTF-8";
-        case ' ':
-        case '#':
-        default:
-          return "ISO8859_1";  // MARC-8 or default
-      }
-    }
-    return "ISO8859_1";  // Default fallback
-  }
-
-  /**
    * Handles running blocks of records through the stylesheet
    */
   private class RecordHandler extends Thread implements ContentHandler 
@@ -319,11 +295,7 @@ public class MARCIndexSource extends IndexSource
     private void convertRecords()
       throws Exception 
     {
-      // Detect encoding from MARC leader
-      String encoding = detectMarcEncoding(rawStream);
-      
-      // Create a MarcReader with the detected encoding
-      MarcReader reader = new MarcStreamReader(rawStream, encoding);
+      MarcPermissiveStreamReader reader = new MarcPermissiveStreamReader(rawStream, true, true);
       
       // Process each record
       while (reader.hasNext()) {
@@ -371,6 +343,7 @@ public class MARCIndexSource extends IndexSource
     private String stripIllegalXmlCharacters(String input) {
       if (input == null) return null;
       
+      input = input.replaceAll("[\\x00-\\x08\\x0B-\\x0C\\x0E-\\x1F]", "");
       // Pattern matches &#[decimal]; or &#x[hex]; entity references
       java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("&#(x?)([0-9A-Fa-f]+);");
       java.util.regex.Matcher matcher = pattern.matcher(input);

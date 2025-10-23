@@ -130,7 +130,7 @@ public abstract class FileWalker
    *  @param subDirs  A flag indicating whether or not sub-directories
    *                  should be processed. <br><br>
    *
-   *  @.notes
+   *  Notes: 
    *      This method calls itself recursively if sub-directory processing
    *      is enabled with the <code> subDirs </code> parameter. Once an
    *      actual file is encountered, this method calls the derived

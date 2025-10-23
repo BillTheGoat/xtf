@@ -174,7 +174,7 @@ public class IndexInfo
    * and <code>chunkOvlp</code> constants defined by this class.
    * <br><br>
    *
-   * @.notes  For an explanation of the text chunk size and overlap attributes,
+   * Notes:   For an explanation of the text chunk size and overlap attributes,
    *       see {@link org.cdlib.xtf.textIndexer.IndexInfo#chunkSize chunkSize}
    *       and {@link org.cdlib.xtf.textIndexer.IndexInfo#chunkOvlp chunkOvlp}.
    */
@@ -204,7 +204,7 @@ public class IndexInfo
   /** Constant defining the minimum size (in words) of a text chunk.
    *  Value = {@value}. <br><br>
    *
-   * @.notes  For an explanation of the text chunk size and overlap attributes,
+   * Notes:   For an explanation of the text chunk size and overlap attributes,
    *       see {@link org.cdlib.xtf.textIndexer.IndexInfo#chunkSize chunkSize}
    *       and {@link org.cdlib.xtf.textIndexer.IndexInfo#chunkOvlp chunkOvlp}.
    */
@@ -213,7 +213,7 @@ public class IndexInfo
   /** Constant defining the default size (in words) of a text chunk.
    *  Value = {@value}. <br><br>
    *
-   * @.notes  For an explanation of the text chunk size and overlap attributes,
+   * Notes:   For an explanation of the text chunk size and overlap attributes,
    *       see {@link org.cdlib.xtf.textIndexer.IndexInfo#chunkSize chunkSize}
    *       and {@link org.cdlib.xtf.textIndexer.IndexInfo#chunkOvlp chunkOvlp}.
    */
@@ -222,7 +222,7 @@ public class IndexInfo
   /** Constant defining the default overlap (in words) of two adjacent text
    *  chunks. Value = {@value}.
    *
-   * @.notes  For an explanation of the text chunk size and overlap attributes,
+   * Notes:   For an explanation of the text chunk size and overlap attributes,
    *       see {@link org.cdlib.xtf.textIndexer.IndexInfo#chunkSize chunkSize}
    *       and {@link org.cdlib.xtf.textIndexer.IndexInfo#chunkOvlp chunkOvlp}.
    */
@@ -231,7 +231,7 @@ public class IndexInfo
   /** Constant defining the default list of stop words. These are common words
    *  that are so ubiquitous as to be of little use in queries. Value = {@value}.
    *
-   * @.notes  For an explanation of stop word handling,
+   * Notes:   For an explanation of stop word handling,
    *       see {@link #stopWords stopWords}
    */
   public final static String defaultStopWords = "a an and are as at be but by for if in into is it no not of on or s " +
@@ -295,7 +295,7 @@ public class IndexInfo
    *
    *  @return    The value of the <code>chunkSize</code> attribute. <br><br>
    *
-   *  @.notes
+   *  Notes: 
    *      For an explanation of the text chunk size and overlap attributes,
    *       see {@link org.cdlib.xtf.textIndexer.IndexInfo#chunkSize chunkSize}
    *       and {@link org.cdlib.xtf.textIndexer.IndexInfo#chunkOvlp chunkOvlp}.
@@ -312,7 +312,7 @@ public class IndexInfo
    *  @return     The value of the <code>chunkSize</code> attribute converted
    *              to a String. <br><br>
    *
-   *  @.notes      This method is intended as a convenience call for code that
+   *  Notes:       This method is intended as a convenience call for code that
    *               creats Lucene fields, which are all stored as strings.
    *               <br><br>
    *
@@ -331,7 +331,7 @@ public class IndexInfo
    *
    *  @return    The value of the <code>chunkOvlp</code> attribute. <br><br>
    *
-   *  @.notes
+   *  Notes: 
    *       For an explanation of the text chunk size and overlap attributes,
    *       see {@link org.cdlib.xtf.textIndexer.IndexInfo#chunkSize chunkSize}
    *       and {@link org.cdlib.xtf.textIndexer.IndexInfo#chunkOvlp chunkOvlp}.
@@ -348,7 +348,7 @@ public class IndexInfo
    *  @return     The value of the <code>chunkOvlp</code> attribute
    *              converted to a String. <br><br>
    *
-   *  @.notes     This method is intended as a convenience call for code that
+   *  Notes:      This method is intended as a convenience call for code that
    *              creats Lucene fields, which are all stored as strings.
    *              <br><br>
    *
@@ -371,7 +371,7 @@ public class IndexInfo
    *
    *  @return     The resulting coerced chunkSize value. <br><br>
    *
-   *  @.notes     This function also calls the
+   *  Notes:      This function also calls the
    *              {@link org.cdlib.xtf.textIndexer.IndexInfo#setChunkOvlp(int) setChunkOvlp()}
    *              method to ensure that the overlap value is valid for the
    *              chunk size set by this call.

@@ -61,19 +61,19 @@ import org.cdlib.xtf.util.Trace;
  *
  * The format of the configuration file is as follows:
  *
- * <code><blockquote dir=ltr style="MARGIN-RIGHT: 0px">
+ * <code><blockquote style="MARGIN-RIGHT: 0px">
  * <b>&lt;?xml version="1.0" encoding="utf-8"?&gt;</b><br>
  * <b>&lt;textIndexer-config&gt;</b><br><br>
  *
- *  <blockquote dir=ltr style="MARGIN-RIGHT: 0px">
- *  <b>&lt;index name="</b><font color=#0000ff><i>IndexName</i></font><b>"&gt; </b>
- *    <blockquote dir=ltr style="MARGIN-RIGHT: 0px">
- *    <b>&lt;db path="</b><font color=#0000ff><i>LuceneIndexPath</i></font><b>"/&gt; </b> <br>
- *    <b>&lt;src path="</b><font color=#0000ff><i>XMLSourcePath</i></font><b>"/&gt; </b> <br>
- *    <b>&lt;chunk size="</b><font color=#0000ff><i>ChunkSize</i></font><b>"
- *             overlap="</b><font color=#0000ff><i>ChunkOverlap</i></font><b>"/&gt; </b> <br>
- *    <b>&lt;skip files= "</b><font color=#0000ff><i>*.xxx*, *.yyy, ... </i></font><b>"/&gt; </b><br>
- *    <b>&lt;inputfilter path="</b><font color=#0000ff><i>XSLPreFilterFile</i></font><b>"/&gt;</b><br><br>
+ *  <blockquote style="MARGIN-RIGHT: 0px">
+ *  <b>&lt;index name="</b><i>IndexName</i><b>"&gt; </b>
+ *    <blockquote style="MARGIN-RIGHT: 0px">
+ *    <b>&lt;db path="</b><i>LuceneIndexPath</i><b>"/&gt; </b> <br>
+ *    <b>&lt;src path="</b><i>XMLSourcePath</i><b>"/&gt; </b> <br>
+ *    <b>&lt;chunk size="</b><i>ChunkSize</i><b>"
+ *             overlap="</b><i>ChunkOverlap</i><b>"/&gt; </b> <br>
+ *    <b>&lt;skip files= "</b><i>*.xxx*, *.yyy, ... </i><b>"/&gt; </b><br>
+ *    <b>&lt;inputfilter path="</b><i>XSLPreFilterFile</i><b>"/&gt;</b><br><br>
  *    </blockquote>
  *  <b>&lt;/index&gt; </b><br><br>
  *
@@ -92,13 +92,13 @@ import org.cdlib.xtf.util.Trace;
  * <br><br>
  *
  * <code>
- * <blockquote dir=ltr style="MARGIN-RIGHT: 0px"><b>
+ * <blockquote style="MARGIN-RIGHT: 0px"><b>
  * &lt;?xml version="1.0" encoding="utf-8"?&gt; <br>
  * &lt;textIndexer-config&gt;
  *
- *   <blockquote dir=ltr style="MARGIN-RIGHT: 0px">
+ *   <blockquote style="MARGIN-RIGHT: 0px">
  *   &lt;index name="AllText"&gt;
- *     <blockquote dir=ltr style="MARGIN-RIGHT: 0px">
+ *     <blockquote style="MARGIN-RIGHT: 0px">
  *     &lt;db path="./IndexDBs"/&gt; <br>
  *     &lt;src path="./SourceText"/&gt; <br>
  *     &lt;chunk size="100" overlap="50"/&gt; <br>
@@ -113,7 +113,7 @@ import org.cdlib.xtf.util.Trace;
  * </blockquote></b>
  * </code>
  *
- * @.notes
+ * Notes: 
  *
  * This class is derived from the SAX {@link org.xml.sax.helpers.DefaultHandler} class so that
  * its {@link XMLConfigParser#startElement(String,String,String,Attributes) startElement()}
@@ -151,7 +151,7 @@ public class XMLConfigParser extends DefaultHandler
    * @throws  Exception  Any internal exceptions generated while parsing the
    *                     configuration file. <br><br>
    *
-   * @.notes
+   * Notes: 
    * The format of the XML file is explained in greater detail in the description
    * for the {@link XMLConfigParser} class. <br><br>
    *
@@ -259,7 +259,7 @@ public class XMLConfigParser extends DefaultHandler
    * @throws  SAXException Any internal exceptions generated due to
    *                       syntax problems in the element. <br><br>
    *
-   * @.notes
+   * Notes: 
    *  For an explanation of the config file format, see the main description
    *  for the {@link XMLConfigParser} class. <br><br>
    */
@@ -568,7 +568,7 @@ public class XMLConfigParser extends DefaultHandler
     * @throws SAXException  If any internal exceptions generated due to
     *                       syntax problems in the element. <br><br>
     *
-    * @.notes
+    * Notes: 
     *  For an explanation of the config file format, see the main description
     *  for the {@link XMLConfigParser} class. <br><br>
     */

@@ -131,13 +131,13 @@ import org.cdlib.xtf.util.WordMap;
  * Word bump adjustments are made through the use of attributes added to nodes
  * in the XML source text file. The available word bump attributes are:
  *
- * <blockquote dir=ltr style="MARGIN-RIGHT: 0px">
- *   <b><code>xtf:sentencebump="</code><font color=#0000ff><i>xxx</i></font><code>"</code></b><br>
+ * <blockquote style="MARGIN-RIGHT: 0px">
+ *   <b><code>xtf:sentencebump="</code><i>xxx</i><code>"</code></b><br>
  *   Set the additional word distance implied by sentence breaks in the
  *   associated node. If not set explicitly, the default sentence bump value
  *   is 5. <br><br>
  *
- *   <b><code>xtf:sectiontype="</code><font color=#0000ff><i>xxx</i></font><code>"</code></b><br>
+ *   <b><code>xtf:sectiontype="</code><i>xxx</i><code>"</code></b><br>
  *   While this attribute's primary purpose is to assign names to a section of
  *   text, it also forces sections with a different names to start in new, non-
  *   overlapping chunks. The net result is equivalent to placing an "infinite
@@ -155,10 +155,10 @@ import org.cdlib.xtf.util.WordMap;
  * additional non-bump attributes that can be applied to nodes in a source text
  * file:
  *
- * <blockquote dir=ltr style="MARGIN-RIGHT: 0px">
- *   <b><code>xtf:boost="</code><font color=#0000ff><i>xxx</i></font><code>"</code></b><br>
+ * <blockquote style="MARGIN-RIGHT: 0px">
+ *   <b><code>xtf:boost="</code><i>xxx</i><code>"</code></b><br>
  *   Boosts the ranking of words found in the associated node by multiplying
- *   their base relevance by the number <font color=#0000ff><i>xxx</i></font>.
+ *   their base relevance by the number <i>xxx</i>.
  *   Normally, a boost value greater than <code>1.0</code> is used to emphasize
  *   the associated text, but values less than <code>1.0</code> can be used as
  *   an "inverse" boost to de-emphasize the relevance of text.  Also, since
@@ -486,7 +486,7 @@ public class XMLTextProcessor extends DefaultHandler
    * @param ignoreFileTimes true to ignore file time checks (only applies
    *                  during incremental indexing).
    *
-   * @.notes
+   * Notes: 
    *   This method will create an index if it doesn't exist, or truncate an index
    *   that does exist if the <code>clean</code> flag is set in the
    *   <code>cfgInfo</code> structure. <br><br>
@@ -653,7 +653,7 @@ public class XMLTextProcessor extends DefaultHandler
    *
    * This method closes the current open Lucene index (if any.) <br><br>
    *
-   * @.notes
+   * Notes: 
    *   This method closes any <code>indexReader</code>, <code>indexWriter</code>
    *   or <code>indexSearcher</code> objects open for the current Lucene index.
    *   <br><br>
@@ -690,7 +690,7 @@ public class XMLTextProcessor extends DefaultHandler
    * This method is used by the {@link XMLTextProcessor#createIndex(IndexInfo) createIndex() }
    * method to create a new or clean index for reading and searching. <br><br>
    *
-   * @.notes
+   * Notes: 
    *   This method creates the Lucene database for the index, and then adds
    *   an "index info chunk" that identifies the chunk size and overlap used.
    *   This information is required by the search engine to correctly detect
@@ -774,7 +774,7 @@ public class XMLTextProcessor extends DefaultHandler
    *  @param idxSrc  The source to add to the queue of sources to be
    *                 indexed/reindexed. <br><br>
    *
-   *  @.notes
+   *  Notes: 
    *    For more about why source text files are queued, see the
    *    {@link XMLTextProcessor#processQueuedTexts() processQueuedTexts()}
    *    method. <br><br>
@@ -806,7 +806,7 @@ public class XMLTextProcessor extends DefaultHandler
    *  @param idxSrc  The data source to add to the queue of sources to be
    *                 indexed/reindexed. <br><br>
    *
-   *  @.notes
+   *  Notes: 
    *    For more about why source text files are queued, see the
    *    {@link XMLTextProcessor#processQueuedTexts() processQueuedTexts()}
    *    method. <br><br>
@@ -823,7 +823,7 @@ public class XMLTextProcessor extends DefaultHandler
    *  @param srcInfo  The source XML text file to add to the queue of
    *                  files to be indexed/reindexed. <br><br>
    *
-   *  @.notes
+   *  Notes: 
    *    For more about why source text files are queued, see the
    *    {@link XMLTextProcessor#processQueuedTexts() processQueuedTexts()}
    *    method. <br><br>
@@ -970,7 +970,7 @@ public class XMLTextProcessor extends DefaultHandler
    *    IOException   Any I/O exceptions encountered when reading the source
    *                  text file or writing to the Lucene index. <br><br>
    *
-   *  @.notes
+   *  Notes: 
    *    Originally, the <code>XMLTextProcessor</code> opened the Lucene
    *    database, (re)indexed the source file, and then closed the database
    *    for each XML file encountered in the source tree. Unfortunately,
@@ -1107,7 +1107,7 @@ public class XMLTextProcessor extends DefaultHandler
    *   IOException  Any I/O errors encountered opening or reading the XML source
    *                text file or the Lucene database. <br><br>
    *
-   * @.notes
+   * Notes: 
    *   To learn more about the actual mechanincs of how XML source files are
    *   indexed, see the {@link XMLTextProcessor} class description.
    *
@@ -1271,7 +1271,7 @@ public class XMLTextProcessor extends DefaultHandler
    *           <code>-1</code> - One or more errors encountered processing
    *                             XML source file.
    *
-   *  @.notes
+   *  Notes: 
    *    For more about "blurbifying" text, see the {@link XMLTextProcessor#blurbify(StringBuffer,boolean) blurbify()}
    *    method. <br><br>
    *
@@ -1413,7 +1413,7 @@ public class XMLTextProcessor extends DefaultHandler
    *                  {@link XMLTextProcessor#lazyBuilder lazyBuilder}
    *                  during start of document processing. <br><br>
    *
-   *  @.notes
+   *  Notes: 
    *    This method simply calls the start of document handler for the "lazy
    *    tree" builder object {@link XMLTextProcessor#lazyBuilder lazyBuilder}.
    */
@@ -1447,7 +1447,7 @@ public class XMLTextProcessor extends DefaultHandler
    *  @throws
    *    SAXException  Any exceptions generated by calls to "lazy tree" or
    *                  Lucene database access methods. <br><br>
-   *  @.notes
+   *  Notes: 
    *    This method processes any text accumulated before the current start tag
    *    was encountered by calling the {@link XMLTextProcessor#flushCharacters() flushCharacters()}
    *    method. It also calls the {@link XMLTextProcessor#lazyHandler lazyHandler}
@@ -1664,7 +1664,7 @@ public class XMLTextProcessor extends DefaultHandler
 
   /** Increment the node tracking information. <br><br>
    *
-   *  @.notes
+   *  Notes: 
    *    This method is called when a new node in a source XML document
    *    has been encountered. It increments the current node count, resets the
    *    number of words accumulated for the new node to zero, and if a partial
@@ -1701,7 +1701,7 @@ public class XMLTextProcessor extends DefaultHandler
    *  @throws
    *    SAXException  Any exceptions generated by calls to "lazy tree" or
    *                  Lucene database access methods. <br><br>
-   *  @.notes
+   *  Notes: 
    *    This method processes any text accumulated before the current end tag
    *    was encountered by calling the
    *    {@link XMLTextProcessor#flushCharacters() flushCharacters()} method.
@@ -1905,7 +1905,7 @@ public class XMLTextProcessor extends DefaultHandler
    *                         of the Lucene database or the "lazy tree"
    *                         representation of the XML file. <br><br>
    *
-   *  @.notes
+   *  Notes: 
    *    This method indexes any remaining accumulated text, adds any remaining
    *    text to the "lazy tree" representation of the the XML document, and
    *    writes out the document summary record (chunk) to the Lucene database.
@@ -1944,7 +1944,7 @@ public class XMLTextProcessor extends DefaultHandler
    *  @param  length  The number of characters to accumulate from <code>ch</code>.
    *                  <br><br>
    *
-   *  @.notes
+   *  Notes: 
    *    Depending on how the XML parser is implemented, a call to this function
    *    may or may not receive all the characters encountered between two tags
    *    in an XML file. However, for the <code>XMLTextProcessor</code> to
@@ -1994,10 +1994,10 @@ public class XMLTextProcessor extends DefaultHandler
    *       SAXException  Any exceptions encountered during the processing of
    *                     the accumulated chunks, or writing them to the Lucene
    *                     index. <br><br>
-   *  @.notes
+   *  Notes: 
    *    This method processes any accumulated text as follows:
    *
-   *    <blockquote dir=ltr style="MARGIN-RIGHT: 0px">
+   *    <blockquote style="MARGIN-RIGHT: 0px">
    *     1. First the accumulated text is "blurbified." See the
    *        {@link XMLTextProcessor#blurbify(StringBuffer,boolean) blurbify()}
    *        method for more information about what this entails. <br><br>
@@ -2305,7 +2305,7 @@ public class XMLTextProcessor extends DefaultHandler
    *  breaks or new section types does not overlap with any previously
    *  accumulated source text.
    *
-   *  @.notes
+   *  Notes: 
    *    This method writes out any accumulated text and resets the chunk
    *    tracking information to the start of a new chunk.
    */
@@ -2413,7 +2413,7 @@ public class XMLTextProcessor extends DefaultHandler
    *                 whitespace should be trimmed from the resulting "blurb"
    *                 text. <br><br>
    *
-   *  @.notes
+   *  Notes: 
    *    This function also compresses multiple space characters into a single
    *    space character, and removes any internal processing markers (i.e.,
    *    node tracking or bump tracking markers.)
@@ -2490,7 +2490,7 @@ public class XMLTextProcessor extends DefaultHandler
    *  @param  text  The text into which virtual words should be inserted.
    *                <br><br>
    *
-   *  @.notes
+   *  Notes: 
    *    Virtual words? What's that all about? Well... <br><br>
    *
    *    The search engine is capable of performing proximity searches (up to
@@ -2515,7 +2515,7 @@ public class XMLTextProcessor extends DefaultHandler
    *    in the final "blurb" seen by the user. For example, assume we have a
    *    sentence bump set to five, and the following text:
    *
-   *    <blockquote dir=ltr style="MARGIN-RIGHT: 0px">
+   *    <blockquote style="MARGIN-RIGHT: 0px">
    *    Luke Luck likes lakes. <br>
    *    Luke's duck likes lakes. <br>
    *    Luke Luck licks lakes. <br>
@@ -2528,7 +2528,7 @@ public class XMLTextProcessor extends DefaultHandler
    *    <b>Fox in Sox</b>, the resulting blurb text that is added to
    *    the index looks as follows:
    *
-   *    <blockquote dir=ltr style="MARGIN-RIGHT: 0px">
+   *    <blockquote style="MARGIN-RIGHT: 0px">
    *    Luke Luck likes lakes. <i>vw vw vw vw vw</i><br>
    *    Luke's duck likes lakes. <i>vw vw vw vw vw</i><br>
    *    Luke Luck licks lakes. <i>vw vw vw vw vw</i><br>
@@ -2648,7 +2648,7 @@ public class XMLTextProcessor extends DefaultHandler
    *    <code>false</code> - The current character does <b>not</b> mark
    *                         the end of a sentence. <br><br>
    *
-   *  @.notes
+   *  Notes: 
    *     This method handles obvious end of sentence markers like <b>.</b>,
    *     <b>?</b> and <b>!</b>, but also "artistic" punctuation like <b>???</b>,
    *     <b>!!!</b>, and <b>?!?!</b>. Currently, it considers <b>...</b> to
@@ -2742,7 +2742,7 @@ public class XMLTextProcessor extends DefaultHandler
    *    <code>false</code> - The specified character is <b>not</b> a
    *                         sentence punctuation character. <br><br>
    *
-   *  @.notes
+   *  Notes: 
    *    This function looks for punctuation that marks the end of a sentence
    *    (not clause markers, like <b>;</b>, <b>:</b>, etc.) At this time, only
    *    <b>.</b>,, <b>?</b>, and <b>!</b> are considered end of sentence
@@ -2772,7 +2772,7 @@ public class XMLTextProcessor extends DefaultHandler
    *  @param  pos    The character index in the text at which to insert the
    *                 virtual words. <br><br>
    *
-   *  @.notes
+   *  Notes: 
    *    For an in-depth explanation of virtual words, see the main
    *    {@link XMLTextProcessor#insertVirtualWords(StringBuffer) insertVirtualWords()}
    *    method.
@@ -2805,7 +2805,7 @@ public class XMLTextProcessor extends DefaultHandler
    *
    *  @param  secInfo      Info such as sectionType, wordBoost, etc.
    *
-   *  @.notes
+   *  Notes: 
    *    This method peforms the final step of adding a chunk of assembled text
    *    to the Lucene database specified by the
    *    {@link XMLTextProcessor#indexInfo indexInfo} configuration member.
@@ -2958,7 +2958,7 @@ public class XMLTextProcessor extends DefaultHandler
    *  @throws  IOException  Any exceptions generated by low level string
    *                        operations. <br><br>
    *
-   *  @.notes
+   *  Notes: 
    *    For an explanation of "virtual words", see the main
    *    {@link XMLTextProcessor#insertVirtualWords(StringBuffer) insertVirtualWords()}
    *    method. <br><br>
@@ -3161,7 +3161,7 @@ public class XMLTextProcessor extends DefaultHandler
    *    boolean value if the string doesn't contain <b>true</b>, <b>false</b>,
    *    <b>yes</b> or <b>no</b>. <br><br>
    *
-   *  @.notes
+   *  Notes: 
    *    This function is primarily used to interpret values of on/off style
    *    attributes associated with prefiltered nodes in the XML source text.
    *    <br><br>
@@ -3189,7 +3189,7 @@ public class XMLTextProcessor extends DefaultHandler
    *
    *  @param  atts  The attribute list to process. <br><br>
    *
-   *  @.notes
+   *  Notes: 
    *    This method is called to process a list of attributes associated with
    *    a node. These attributes are typically inserted into the XML source
    *    text by an XSL prefilter. <br><br>
@@ -3491,7 +3491,7 @@ public class XMLTextProcessor extends DefaultHandler
    *  Lucene database that binds all the indexed text chunks for a document
    *  back to the original XML source text.
    *
-   *  @.notes
+   *  Notes: 
    *    The document summary chunk is the last chunk written to a Lucene
    *    database for a given XML source document. Its presence or absence
    *    then can be used to identify whether or a document was completely
@@ -3749,7 +3749,7 @@ public class XMLTextProcessor extends DefaultHandler
    *                     the source text has changed since it was last indexed.
    *                     <br><br>
    *
-   *  @.notes
+   *  Notes: 
    *     The XML source document checked by this function is specified by the
    *     {@link XMLTextProcessor#curIdxSrc curIdxSrc} member. <br><br>
    *
@@ -3867,7 +3867,7 @@ public class XMLTextProcessor extends DefaultHandler
    *    IOException  Any exceptions generated during the creation of the
    *                 Lucene database writer object.
    *
-   *  @.notes
+   *  Notes: 
    *    This method attempts to open the Lucene database specified by the
    *    {@link XMLTextProcessor#indexPath indexPath} member for reading
    *    and/or deleting. It is strange that you delete things from a
@@ -3899,7 +3899,7 @@ public class XMLTextProcessor extends DefaultHandler
    *    IOException  Any exceptions generated during the creation of the
    *                 Lucene database writer object.
    *
-   *  @.notes
+   *  Notes: 
    *    This method attempts to open the Lucene database specified by the
    *    {@link XMLTextProcessor#indexPath indexPath} member for writing.
    *    <br><br>
